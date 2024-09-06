@@ -1,12 +1,17 @@
+import { useState } from "react";
+
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from 'yup';
 
+import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export const Login = () => {
   const navigate = useNavigate();
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -18,7 +23,13 @@ export const Login = () => {
       password: Yup.string().required("Password is required"),
     }),
     onSubmit: (values) => {
-      console.log(values);
+      setIsLoading(true);
+
+      setTimeout(() => {
+        localStorage.setItem("user", JSON.stringify(values));
+        navigate("/", { replace: true });
+        setIsLoading(false);
+      }, 2000);
     },
   })
 
@@ -49,7 +60,7 @@ export const Login = () => {
         onBlur={formik.handleBlur}
       />
       <Button type="submit" className="w-full mb-2">
-        Login
+        {isLoading ? <Spinner size="size-6" /> : "Login"}
       </Button>
       <Button
         type="button"

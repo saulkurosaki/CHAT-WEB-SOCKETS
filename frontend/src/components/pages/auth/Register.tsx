@@ -1,9 +1,12 @@
+import { useState } from "react";
+
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from 'yup';
 
 import { Camera, X } from "lucide-react";
 
+import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +23,8 @@ interface InitialForm {
 
 export const Register = () => {
   const navigate = useNavigate();
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const formik = useFormik<InitialForm>({
     initialValues: {
@@ -40,6 +45,15 @@ export const Register = () => {
       password: Yup.string().required('Password is required'),
     }),
     onSubmit: values => {
+      setIsLoading(true);
+
+      setTimeout(() => {
+        setTimeout(() => {
+          localStorage.setItem("user", JSON.stringify(values));
+          navigate("/", { replace: true });
+          setIsLoading(false);
+        }, 2000);
+      })
       alert(JSON.stringify(values, null, 2));
     },
   });
@@ -161,7 +175,7 @@ export const Register = () => {
       </div>
       
       <Button type="submit" className="w-full mb-2">
-        Register
+        {isLoading ? <Spinner size="size-6" /> : "Register"}
       </Button>
 
       <Button
