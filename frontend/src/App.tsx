@@ -1,11 +1,9 @@
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Login from "./components/pages/auth/Login";
-import Register from "./components/pages/auth/Register";
-import ChatRooms from "./components/pages/ChatRooms";
-import ChatApp from "./components/ChatApp";
+import { RouterProvider } from "react-router-dom";
+
+import { router } from "./router";
 
 function App() {
-  return <ChatApp />;
+  return <RouterProvider router={router} />;
 }
 
 export default App;
