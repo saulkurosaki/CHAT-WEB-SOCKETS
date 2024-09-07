@@ -2,7 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 
 import { AuthLayout, RootLayout } from "@/components/layouts";
 import { Login, Register } from "@/components/pages/auth";
-import { Chats } from "@/components/pages/private";
+import { ChatRooms } from "@/components/pages/private";
 
 export const router = createBrowserRouter([
   {
@@ -12,11 +12,15 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Chats />,
+        element: <ChatRooms />,
       },
       {
-        path: 'chat-room/:id',
+        path: 'chat/:id',
         element: <div>Chat Room</div>,
+      },
+      {
+        path: 'profile',
+        element: <div>Profile</div>,
       },
     ]
   },
