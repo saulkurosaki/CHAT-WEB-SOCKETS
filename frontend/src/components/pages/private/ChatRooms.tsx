@@ -2,19 +2,25 @@ import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button'
 
-export const Chats = () => {
+import { useUserStore } from '@/store';
+
+export const ChatRooms = () => {
   const navigate = useNavigate();
 
+  const { setUser } = useUserStore();
+
   const handleLogout = () => {
-    localStorage.clear();
+    setUser(null);
     navigate("/auth/login", { replace: true });
   }
 
   return (
-    <div className='h-screen flex flex-col items-center justify-center'>
+    <>
       <h1 className="text-2xl font-bold mb-4 text-center text-teal-600">Chats - Bienvenido</h1>
 
+      <Button onClick={() => navigate("/chat/1")}>Chat 1</Button>
+
       <Button onClick={handleLogout}>Logout</Button>
-    </div>
+    </>
   )
 }

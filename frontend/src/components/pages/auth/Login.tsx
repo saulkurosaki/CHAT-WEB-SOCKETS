@@ -4,12 +4,16 @@ import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from 'yup';
 
+import { useUserStore } from "@/store";
+
 import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export const Login = () => {
   const navigate = useNavigate();
+
+  const { setUser } = useUserStore();
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -26,7 +30,18 @@ export const Login = () => {
       setIsLoading(true);
 
       setTimeout(() => {
-        localStorage.setItem("user", JSON.stringify(values));
+        const user = {
+          name: "Cristiano",
+          lastname: "Ronaldo",
+          username: "cr7",
+          email: values.email,
+          phoneNumber: "318559036",
+          profileImage: 'https://pbs.twimg.com/profile_images/1594446880498401282/o4L2z8Ay_400x400.jpg',
+        }
+
+        localStorage.setItem('token', '123456');
+        localStorage.setItem('user', JSON.stringify(user));
+        setUser(user);
         navigate("/", { replace: true });
         setIsLoading(false);
       }, 2000);
@@ -49,6 +64,7 @@ export const Login = () => {
         onChange={formik.handleChange}
         onBlur={formik.handleBlur}
       />
+
       <Input
         type="password"
         name="password"
@@ -59,9 +75,11 @@ export const Login = () => {
         onChange={formik.handleChange}
         onBlur={formik.handleBlur}
       />
+
       <Button type="submit" className="w-full mb-2">
         {isLoading ? <Spinner size="size-6" /> : "Login"}
       </Button>
+
       <Button
         type="button"
         variant="link"

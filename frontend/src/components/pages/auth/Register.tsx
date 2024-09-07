@@ -6,6 +6,8 @@ import * as Yup from 'yup';
 
 import { Camera, X } from "lucide-react";
 
+import { useUserStore } from "@/store";
+
 import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +25,8 @@ interface InitialForm {
 
 export const Register = () => {
   const navigate = useNavigate();
+
+  const { setUser } = useUserStore();
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -49,7 +53,19 @@ export const Register = () => {
 
       setTimeout(() => {
         setTimeout(() => {
-          localStorage.setItem("user", JSON.stringify(values));
+          const user = {
+            name: values.name,
+            lastname: values.lastname,
+            username: values.username,
+            email: values.email,
+            phoneNumber: values.phoneNumber,
+            profileImage: 'https://pbs.twimg.com/profile_images/1594446880498401282/o4L2z8Ay_400x400.jpg'
+          }
+
+          localStorage.setItem('token', '123456');
+          localStorage.setItem("user", JSON.stringify(user));
+          setUser(user);
+
           navigate("/", { replace: true });
           setIsLoading(false);
         }, 2000);
