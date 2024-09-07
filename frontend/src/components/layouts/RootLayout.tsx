@@ -13,7 +13,6 @@ export const RootLayout = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    console.log('user', user, 'token', token);
 
     if (!user && !token) {
       navigate("/auth/login", { replace: true });
@@ -23,17 +22,19 @@ export const RootLayout = () => {
       const userStorage = localStorage.getItem('user');
       if (userStorage) setUser(JSON.parse(userStorage));
     }
-  }, [])
+  }, []);
 
   return (
-    <div className="w-full h-screen flex flex-col bg-gray-100">
-      <Header />
+    <div className="w-full h-full bg-gray-200">
+      <div className="w-full h-screen max-w-[1440px] flex flex-col mx-auto">
+        <Header />
 
-      <main
-        className='w-full h-[calc(100vh - 64px)] flex flex-col items-center justify-center'
-      >
-        <Outlet />
-      </main>
+        <main
+          className='w-full h-[calc(100vh - 64px)] flex flex-col items-center justify-center overflow-auto'
+        >
+          <Outlet />
+        </main>
+      </div>
     </div>
   )
 }
