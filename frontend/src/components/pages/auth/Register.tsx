@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
-import * as Yup from 'yup';
+import * as Yup from "yup";
 
 import { Camera, X } from "lucide-react";
 
@@ -25,64 +25,43 @@ interface InitialForm {
 
 export const Register = () => {
   const navigate = useNavigate();
-
   const { setUser } = useUserStore();
-
   const [isLoading, setIsLoading] = useState(false);
+  const [profileImage, setProfileImage] = useState<File | null>(null);
 
   const formik = useFormik<InitialForm>({
     initialValues: {
-      name: '',
-      lastname: '',
-      username: '',
-      email: '',
-      phoneNumber: '',
-      password: '',
-      profileImage: null
+      name: "",
+      lastname: "",
+      username: "",
+      email: "",
+      phoneNumber: "",
+      password: "",
+      profileImage: null,
     },
     validationSchema: Yup.object({
-      name: Yup.string().required('Name is required'),
-      lastname: Yup.string().required('Lastname is required'),
-      username: Yup.string().required('Username is required'),
-      email: Yup.string().email('Invalid email').required('Email is required'),
-      phoneNumber: Yup.string().required('Phone number is required'),
-      password: Yup.string().required('Password is required'),
+      name: Yup.string().required("Name is required"),
+      lastname: Yup.string().required("Lastname is required"),
+      username: Yup.string().required("Username is required"),
+      email: Yup.string().email("Invalid email").required("Email is required"),
+      phoneNumber: Yup.string().required("Phone number is required"),
+      password: Yup.string().required("Password is required"),
     }),
-    onSubmit: values => {
+    onSubmit: (values) => {
       setIsLoading(true);
-
       setTimeout(() => {
-        setTimeout(() => {
-          const user = {
-            name: values.name,
-            lastname: values.lastname,
-            username: values.username,
-            email: values.email,
-            phoneNumber: values.phoneNumber,
-            profileImage: 'https://pbs.twimg.com/profile_images/1594446880498401282/o4L2z8Ay_400x400.jpg'
-          }
-
-          localStorage.setItem('token', '123456');
-          localStorage.setItem("user", JSON.stringify(user));
-          setUser(user);
-
-          navigate("/", { replace: true });
-          setIsLoading(false);
-        }, 2000);
-      })
-      alert(JSON.stringify(values, null, 2));
+        const user = {
+          ...values,
+          profileImage: profileImage ? URL.createObjectURL(profileImage) : null,
+        };
+        localStorage.setItem("token", "123456");
+        localStorage.setItem("user", JSON.stringify(user));
+        setUser(user);
+        navigate("/", { replace: true });
+        setIsLoading(false);
+      }, 2000);
     },
   });
-
-  const handleChangeProfileImage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files.length > 0) {
-      formik.setFieldValue('profileImage', event.target.files[0]);
-    }
-  };
-
-  const handleRemoveProfileImage = () => {
-    formik.setFieldValue('profileImage', null);
-  };
 
   return (
     <form onSubmit={formik.handleSubmit}>
@@ -156,40 +135,40 @@ export const Register = () => {
         onBlur={formik.handleBlur}
       />
 
-      <div className="mb-4">        
-        {formik.values.profileImage ? (
+      <div className="mb-4">
+        <Label
+          htmlFor="profile-image"
+          className="cursor-pointer flex items-center justify-center p-2 border border-dashed border-gray-300 rounded-md"
+        >
+          <Camera className="mr-2 h-4 w-4" />
+          <span>Upload Profile Image (Optional)</span>
+          <Input
+            id="profile-image"
+            type="file"
+            className="hidden"
+            onChange={(e) =>
+              setProfileImage(e.target.files ? e.target.files[0] : null)
+            }
+          />
+        </Label>
+        {profileImage && (
           <div className="mt-2 relative">
             <img
-              src={URL.createObjectURL(formik.values.profileImage)}
+              src={URL.createObjectURL(profileImage)}
               alt="Profile preview"
-              className="w-full h-32 object-contain rounded-md"
+              className="w-full h-32 object-cover rounded-md"
             />
             <Button
               variant="ghost"
               className="absolute top-0 right-0"
-              onClick={handleRemoveProfileImage}
+              onClick={() => setProfileImage(null)}
             >
               <X className="h-4 w-4" />
             </Button>
           </div>
-        ) : (
-          <Label
-            htmlFor="profile-image"
-            className="cursor-pointer flex items-center justify-center p-2 border border-dashed border-gray-300 rounded-md"
-          >
-            <Camera className="mr-2 h-4 w-4" />
-            <span>Upload Profile Image (Optional)</span>
-            <Input
-              type="file"
-              name="profileImage"
-              id="profile-image"
-              className="hidden"
-              onChange={handleChangeProfileImage}
-            />
-          </Label>
         )}
       </div>
-      
+
       <Button type="submit" className="w-full mb-2">
         {isLoading ? <Spinner size="size-6" /> : "Register"}
       </Button>
@@ -198,7 +177,7 @@ export const Register = () => {
         type="button"
         variant="link"
         className="w-full"
-        onClick={() => navigate('/auth/login')}
+        onClick={() => navigate("/auth/login")}
       >
         Already have an account? Login
       </Button>
