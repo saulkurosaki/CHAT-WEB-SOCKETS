@@ -21,7 +21,6 @@ export class CreateUserDto {
 
     @IsString()
     @IsEmail()
-    @IsLowercase()
     email: string;
 
     @IsString()
