@@ -52,7 +52,12 @@ export const Register = () => {
           formData.append(key, value);
         }
       });
-      console.log("Datos a enviar:", Array.from(formData.entries()));
+
+      const bodyData: { [key: string]: any } = {};
+      for (const [key, value] of formData.entries()) {
+        bodyData[key] = value;
+      }
+
       try {
         const response = await fetch(
           "http://localhost:3000/api/v1/auth/register",
@@ -61,12 +66,13 @@ export const Register = () => {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify(formData),
+            body: JSON.stringify(bodyData),
           }
         );
 
         if (!response.ok) {
-          console.log(response);
+          const errorResponse = await response.json();
+          console.log(errorResponse);
           throw new Error("Registration failed");
         }
 
