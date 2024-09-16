@@ -26,24 +26,35 @@ export const Login = () => {
       email: Yup.string().email("Invalid email").required("Email is required"),
       password: Yup.string().required("Password is required"),
     }),
-    onSubmit: (values) => {
+    onSubmit: async (values) => {
       setIsLoading(true);
-      setTimeout(() => {
-        const user = {
-          name: "Cristiano",
-          lastname: "Ronaldo",
-          username: "cr7",
-          email: values.email,
-          phoneNumber: "318559036",
-          profileImage:
-            "https://pbs.twimg.com/profile_images/1594446880498401282/o4L2z8Ay_400x400.jpg",
-        };
-        localStorage.setItem("token", "123456");
+      try {
+        const response = await fetch(
+          "http://localhost:3000/api/v1/auth/login",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(values),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Login failed");
+        }
+
+        const user = await response.json();
+        localStorage.setItem("token", user.token);
         localStorage.setItem("user", JSON.stringify(user));
         setUser(user);
         navigate("/", { replace: true });
+      } catch (error) {
+        console.error(error);
+        alert("Login failed. Please try again.");
+      } finally {
         setIsLoading(false);
-      }, 2000);
+      }
     },
   });
 

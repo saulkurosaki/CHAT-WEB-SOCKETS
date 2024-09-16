@@ -1,13 +1,9 @@
 import { useState } from "react";
-
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-
 import { Camera, X } from "lucide-react";
-
 import { useUserStore } from "@/store";
-
 import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,9 +14,9 @@ interface InitialForm {
   lastname: string;
   username: string;
   email: string;
-  phoneNumber: string;
+  phone: string;
   password: string;
-  profileImage: File | null;
+  avatar: File | null;
 }
 
 export const Register = () => {
@@ -35,31 +31,56 @@ export const Register = () => {
       lastname: "",
       username: "",
       email: "",
-      phoneNumber: "",
+      phone: "",
       password: "",
-      profileImage: null,
+      avatar: null,
     },
     validationSchema: Yup.object({
       name: Yup.string().required("Name is required"),
       lastname: Yup.string().required("Lastname is required"),
       username: Yup.string().required("Username is required"),
       email: Yup.string().email("Invalid email").required("Email is required"),
-      phoneNumber: Yup.string().required("Phone number is required"),
+      phone: Yup.string().required("Phone number is required"),
       password: Yup.string().required("Password is required"),
     }),
-    onSubmit: (values) => {
+    onSubmit: async (values) => {
       setIsLoading(true);
-      setTimeout(() => {
-        const user = {
-          ...values,
-          profileImage: profileImage ? URL.createObjectURL(profileImage) : null,
-        };
-        localStorage.setItem("token", "123456");
+      const formData = new FormData();
+      Object.keys(values).forEach((key) => {
+        const value = values[key as keyof InitialForm];
+        if (value !== null) {
+          formData.append(key, value);
+        }
+      });
+      console.log("Datos a enviar:", Array.from(formData.entries()));
+      try {
+        const response = await fetch(
+          "http://localhost:3000/api/v1/auth/register",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          }
+        );
+
+        if (!response.ok) {
+          console.log(response);
+          throw new Error("Registration failed");
+        }
+
+        const user = await response.json();
+        localStorage.setItem("token", user.token);
         localStorage.setItem("user", JSON.stringify(user));
         setUser(user);
         navigate("/", { replace: true });
+      } catch (error) {
+        console.error(error);
+        alert("Registration failed. Please try again.");
+      } finally {
         setIsLoading(false);
-      }, 2000);
+      }
     },
   });
 
@@ -68,7 +89,6 @@ export const Register = () => {
       <h1 className="text-2xl font-bold mb-4 text-center text-teal-600">
         Register
       </h1>
-
       <Input
         type="text"
         name="name"
@@ -79,7 +99,6 @@ export const Register = () => {
         onChange={formik.handleChange}
         onBlur={formik.handleBlur}
       />
-
       <Input
         type="text"
         name="lastname"
@@ -90,7 +109,6 @@ export const Register = () => {
         onChange={formik.handleChange}
         onBlur={formik.handleBlur}
       />
-
       <Input
         type="text"
         name="username"
@@ -101,7 +119,6 @@ export const Register = () => {
         onChange={formik.handleChange}
         onBlur={formik.handleBlur}
       />
-
       <Input
         type="email"
         name="email"
@@ -112,18 +129,16 @@ export const Register = () => {
         onChange={formik.handleChange}
         onBlur={formik.handleBlur}
       />
-
       <Input
-        type="tel"
-        name="phoneNumber"
+        type="text"
+        name="phone"
         placeholder="Phone Number"
-        value={formik.values.phoneNumber}
-        error={formik.errors.phoneNumber}
-        touched={formik.touched.phoneNumber}
+        value={formik.values.phone}
+        error={formik.errors.phone}
+        touched={formik.touched.phone}
         onChange={formik.handleChange}
         onBlur={formik.handleBlur}
       />
-
       <Input
         type="password"
         name="password"
@@ -134,7 +149,6 @@ export const Register = () => {
         onChange={formik.handleChange}
         onBlur={formik.handleBlur}
       />
-
       <div className="mb-4">
         <Label
           htmlFor="profile-image"
@@ -168,11 +182,9 @@ export const Register = () => {
           </div>
         )}
       </div>
-
       <Button type="submit" className="w-full mb-2">
         {isLoading ? <Spinner size="size-6" /> : "Register"}
       </Button>
-
       <Button
         type="button"
         variant="link"
