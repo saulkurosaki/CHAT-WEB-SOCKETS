@@ -3,7 +3,7 @@ import { AxiosError } from "axios";
 import axiosInstance from "@/axios/api";
 import { IResponse } from "@/axios";
 
-import { ILoginParams, IRegisterParams, IUserResponse } from "@/interfaces";
+import { ILoginParams, IUserResponse } from "@/interfaces";
 
 export const login = async (
   body: ILoginParams

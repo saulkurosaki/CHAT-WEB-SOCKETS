@@ -16,8 +16,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Camera, X } from "lucide-react";
 
-import { IRegisterParams } from "@/interfaces";
-
 interface InitialForm {
   name: string;
   lastname: string;
