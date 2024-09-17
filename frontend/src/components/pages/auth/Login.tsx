@@ -4,11 +4,14 @@ import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
+import { login } from "@/services";
+
 import { useUserStore } from "@/store";
 
 import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import toast from "react-hot-toast";
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -19,42 +22,59 @@ export const Login = () => {
 
   const formik = useFormik({
     initialValues: {
-      email: "",
+      emailOrUsername: "",
       password: "",
     },
     validationSchema: Yup.object({
-      email: Yup.string().email("Invalid email").required("Email is required"),
+      emailOrUsername: Yup.string().email("Invalid email").required("Email is required"),
       password: Yup.string().required("Password is required"),
     }),
     onSubmit: async (values) => {
       setIsLoading(true);
-      try {
-        const response = await fetch(
-          "http://localhost:3000/api/v1/auth/login",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(values),
-          }
-        );
 
-        if (!response.ok) {
-          throw new Error("Login failed");
-        }
+      const { ok, data, error } = await login(values);
 
-        const user = await response.json();
-        localStorage.setItem("token", user.token);
-        localStorage.setItem("user", JSON.stringify(user));
-        setUser(user);
-        navigate("/", { replace: true });
-      } catch (error) {
-        console.error(error);
-        alert("Login failed. Please try again.");
-      } finally {
+      if (!ok || error || !data ) {
+        toast.error(error || 'Login failed');
         setIsLoading(false);
+        return;
       }
+
+      toast.success('Successfully created!');
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      setUser(data.user);
+      navigate("/", { replace: true }); 
+
+      setIsLoading(false);
+
+      // try {
+      //   const response = await fetch(
+      //     "http://localhost:3000/api/v1/auth/login",
+      //     {
+      //       method: "POST",
+      //       headers: {
+      //         "Content-Type": "application/json",
+      //       },
+      //       body: JSON.stringify(values),
+      //     }
+      //   );
+
+      //   if (!response.ok) {
+      //     throw new Error("Login failed");
+      //   }
+
+      //   const user = await response.json();
+      //   localStorage.setItem("token", user.token);
+      //   localStorage.setItem("user", JSON.stringify(user));
+      //   setUser(user);
+      //   navigate("/", { replace: true });
+      // } catch (error) {
+      //   console.error(error);
+      //   alert("Login failed. Please try again.");
+      // } finally {
+      //   setIsLoading(false);
+      // }
     },
   });
 
@@ -65,11 +85,11 @@ export const Login = () => {
       </h1>
       <Input
         type="email"
-        name="email"
+        name="emailOrUsername"
         placeholder="Email"
-        value={formik.values.email}
-        error={formik.errors.email}
-        touched={formik.touched.email}
+        value={formik.values.emailOrUsername}
+        error={formik.errors.emailOrUsername}
+        touched={formik.touched.emailOrUsername}
         onChange={formik.handleChange}
         onBlur={formik.handleBlur}
       />

@@ -1,22 +1,30 @@
 import { useState } from "react";
+
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Camera, X } from "lucide-react";
+
+import { register } from "@/services";
+
 import { useUserStore } from "@/store";
+
 import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Camera, X } from "lucide-react";
+
+import { IRegisterParams } from "@/interfaces";
 
 interface InitialForm {
   name: string;
   lastname: string;
   username: string;
   email: string;
-  phone: string;
+  phone?: string;
   password: string;
-  avatar: File | null;
+  avatar?: File | null;
 }
 
 export const Register = () => {
@@ -45,48 +53,66 @@ export const Register = () => {
     }),
     onSubmit: async (values) => {
       setIsLoading(true);
-      const formData = new FormData();
-      Object.keys(values).forEach((key) => {
-        const value = values[key as keyof InitialForm];
-        if (value !== null) {
-          formData.append(key, value);
-        }
-      });
 
-      const bodyData: { [key: string]: any } = {};
-      for (const [key, value] of formData.entries()) {
-        bodyData[key] = value;
-      }
+      delete values.avatar;
 
-      try {
-        const response = await fetch(
-          "http://localhost:3000/api/v1/auth/register",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(bodyData),
-          }
-        );
+      const { ok, data, error } = await register(values as IRegisterParams);
 
-        if (!response.ok) {
-          const errorResponse = await response.json();
-          console.log(errorResponse);
-          throw new Error("Registration failed");
-        }
-
-        const user = await response.json();
-        localStorage.setItem("token", user.token);
-        localStorage.setItem("user", JSON.stringify(user));
-        setUser(user);
-        navigate("/", { replace: true });
-      } catch (error) {
-        console.error(error);
-        alert("Registration failed. Please try again.");
-      } finally {
+      if (!ok || error || !data) {
+        toast.error(error || "Registro fallido");
         setIsLoading(false);
+        return;
       }
+
+      toast.success("Successfully created!");
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      setUser(data.user);
+      navigate("/", { replace: true });
+      setIsLoading(false);
+
+      // const formData = new FormData();
+      // Object.keys(values).forEach((key) => {
+      //   const value = values[key as keyof InitialForm];
+      //   if (value !== null) {
+      //     formData.append(key, value);
+      //   }
+      // });
+
+      // const bodyData: { [key: string]: any } = {};
+      // for (const [key, value] of formData.entries()) {
+      //   bodyData[key] = value;
+      // }
+
+      // try {
+      //   const response = await fetch(
+      //     "http://localhost:3000/api/v1/auth/register",
+      //     {
+      //       method: "POST",
+      //       headers: {
+      //         "Content-Type": "application/json",
+      //       },
+      //       body: JSON.stringify(bodyData),
+      //     }
+      //   );
+
+      //   if (!response.ok) {
+      //     const errorResponse = await response.json();
+      //     console.log(errorResponse);
+      //     throw new Error("Registration failed");
+      //   }
+
+      //   const user = await response.json();
+      //   localStorage.setItem("token", user.token);
+      //   localStorage.setItem("user", JSON.stringify(user));
+      //   setUser(user);
+      //   navigate("/", { replace: true });
+      // } catch (error) {
+      //   console.error(error);
+      //   alert("Registration failed. Please try again.");
+      // } finally {
+      //   setIsLoading(false);
+      // }
     },
   });
 
