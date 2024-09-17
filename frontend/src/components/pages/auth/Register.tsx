@@ -6,6 +6,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 
 import { register } from "@/services";
+import { uploadImage } from "@/services/cloudinaryService"; // Importa la función
 
 import { useUserStore } from "@/store";
 
@@ -24,7 +25,7 @@ interface InitialForm {
   email: string;
   phone?: string;
   password: string;
-  avatar?: File | null;
+  avatar?: string | null;
 }
 
 export const Register = () => {
@@ -53,10 +54,40 @@ export const Register = () => {
     }),
     onSubmit: async (values) => {
       setIsLoading(true);
+      const formData = new FormData();
+      delete values.avatar; // Asegúrate de eliminar el avatar de los valores
 
-      delete values.avatar;
+      if (profileImage) {
+        // Validar el tipo de archivo
+        const validTypes = ["image/jpeg", "image/png", "image/gif"];
+        if (!validTypes.includes(profileImage.type)) {
+          toast.error(
+            "Formato de imagen no válido. Solo se permiten JPEG, PNG y GIF."
+          );
+          setIsLoading(false);
+          return;
+        }
 
-      const { ok, data, error } = await register(values as IRegisterParams);
+        try {
+          const avatarUrl = await uploadImage(profileImage); // Llama a la función para subir la imagen
+          formData.append("avatar", avatarUrl); // Agregar la URL al FormData
+        } catch (error) {
+          console.error("Error al subir la imagen:", error);
+          toast.error("Error al subir la imagen");
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // Agregar otros valores al FormData
+      Object.keys(values).forEach((key) => {
+        const value = values[key as keyof InitialForm];
+        if (value !== undefined && value !== null) {
+          formData.append(key, value);
+        }
+      });
+
+      const { ok, data, error } = await register(formData); // Cambia aquí para pasar formData directamente
 
       if (!ok || error || !data) {
         toast.error(error || "Registro fallido");
@@ -70,49 +101,6 @@ export const Register = () => {
       setUser(data.user);
       navigate("/", { replace: true });
       setIsLoading(false);
-
-      // const formData = new FormData();
-      // Object.keys(values).forEach((key) => {
-      //   const value = values[key as keyof InitialForm];
-      //   if (value !== null) {
-      //     formData.append(key, value);
-      //   }
-      // });
-
-      // const bodyData: { [key: string]: any } = {};
-      // for (const [key, value] of formData.entries()) {
-      //   bodyData[key] = value;
-      // }
-
-      // try {
-      //   const response = await fetch(
-      //     "http://localhost:3000/api/v1/auth/register",
-      //     {
-      //       method: "POST",
-      //       headers: {
-      //         "Content-Type": "application/json",
-      //       },
-      //       body: JSON.stringify(bodyData),
-      //     }
-      //   );
-
-      //   if (!response.ok) {
-      //     const errorResponse = await response.json();
-      //     console.log(errorResponse);
-      //     throw new Error("Registration failed");
-      //   }
-
-      //   const user = await response.json();
-      //   localStorage.setItem("token", user.token);
-      //   localStorage.setItem("user", JSON.stringify(user));
-      //   setUser(user);
-      //   navigate("/", { replace: true });
-      // } catch (error) {
-      //   console.error(error);
-      //   alert("Registration failed. Please try again.");
-      // } finally {
-      //   setIsLoading(false);
-      // }
     },
   });
 
