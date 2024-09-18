@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { IChat } from "@/interfaces";
 import NewPersonalDialog from "@/components/shared/NewPersonalDialog";
 import NewContactDialog from "@/components/shared/NewContactDialog"; // Importar el componente
+import NewGroupDialog from "@/components/shared/NewGroupDialog";
 
 export const ChatRooms = () => {
   const navigate = useNavigate();
@@ -23,12 +24,27 @@ export const ChatRooms = () => {
 
   const [chats, setChats] = useState<IChat[]>([]);
   const [showNewContactDialog, setShowNewContactDialog] = useState(false); // Estado para el diálogo
+  const [showNewGroupDialog, setShowNewGroupDialog] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupImage, setNewGroupImage] = useState(null);
+  const [selectedGroupMembers, setSelectedGroupMembers] = useState([]);
+  const [contacts, setContacts] = useState([]);
 
   useEffect(() => {
     const generatedChats = generateChats(10);
 
     setChats(generatedChats);
   }, []);
+
+  const createGroupChat = () => {
+    if (newGroupName && selectedGroupMembers.length > 0) {
+      // Lógica para crear el grupo
+      setNewGroupName("");
+      setNewGroupImage(null);
+      setSelectedGroupMembers([]);
+      setShowNewGroupDialog(false);
+    }
+  };
 
   const filteredChats = chats.filter((chat) =>
     chat.name.toLowerCase().includes(search.toLowerCase())
@@ -74,9 +90,18 @@ export const ChatRooms = () => {
       </ScrollArea>
 
       <div className="w-full flex justify-between p-4 bg-gray-100">
-        <Button className="w-[48%]">
-          <Plus className="mr-2 h-4 w-4" /> New Group Chat
-        </Button>
+        <NewGroupDialog
+          showNewGroupDialog={showNewGroupDialog}
+          setShowNewGroupDialog={setShowNewGroupDialog}
+          contacts={contacts}
+          newGroupName={newGroupName}
+          setNewGroupName={setNewGroupName}
+          newGroupImage={newGroupImage}
+          setNewGroupImage={setNewGroupImage}
+          selectedGroupMembers={selectedGroupMembers}
+          setSelectedGroupMembers={setSelectedGroupMembers}
+          createGroupChat={createGroupChat}
+        />
 
         <NewPersonalDialog setShowNewContactDialog={setShowNewContactDialog} />
       </div>
