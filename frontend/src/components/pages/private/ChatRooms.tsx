@@ -1,18 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
-import { useNavigate } from 'react-router-dom';
-import { Plus, UserPlus } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
+import { Plus, UserPlus } from "lucide-react";
 
-import { useSearchStore } from '@/store';
+import { useSearchStore } from "@/store";
 
-import { generateChats, handleGetInitials } from '@/helpers';
+import { generateChats, handleGetInitials } from "@/helpers";
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
-import { IChat } from '@/interfaces';
+import { IChat } from "@/interfaces";
+import NewPersonalDialog from "@/components/shared/NewPersonalDialog";
 
 export const ChatRooms = () => {
   const navigate = useNavigate();
@@ -43,12 +44,11 @@ export const ChatRooms = () => {
             >
               <Avatar className="h-12 w-12 mr-4">
                 {chat.image ? (
-                  <AvatarImage
-                    src={chat.image}
-                    alt={chat.name}
-                  />
+                  <AvatarImage src={chat.image} alt={chat.name} />
                 ) : (
-                  <AvatarFallback>{handleGetInitials(chat.name)}</AvatarFallback>
+                  <AvatarFallback>
+                    {handleGetInitials(chat.name)}
+                  </AvatarFallback>
                 )}
               </Avatar>
               <div className="flex-grow">
@@ -58,10 +58,7 @@ export const ChatRooms = () => {
                 </p>
               </div>
               {chat.unreadMessages > 0 && (
-                <Badge
-                  variant="secondary"
-                  className="bg-green-500 text-white"
-                >
+                <Badge variant="secondary" className="bg-green-500 text-white">
                   {chat.unreadMessages}
                 </Badge>
               )}
@@ -78,11 +75,9 @@ export const ChatRooms = () => {
         <Button className="w-[48%]">
           <Plus className="mr-2 h-4 w-4" /> New Group Chat
         </Button>
-        
-        <Button className="w-[48%]">
-          <UserPlus className="mr-2 h-4 w-4" /> New Personal Chat
-        </Button>
+
+        <NewPersonalDialog />
       </div>
     </>
-  )
-}
+  );
+};
