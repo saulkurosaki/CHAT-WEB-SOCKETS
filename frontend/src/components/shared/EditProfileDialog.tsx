@@ -10,6 +10,7 @@ import {
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
+import DeleteProfileConfirmationDialog from "./DeleteProfileConfirmationDialog";
 
 const EditProfileDialog = () => {
   const [name, setName] = useState("");
@@ -17,7 +18,6 @@ const EditProfileDialog = () => {
   const [username, setUsername] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [profileImage, setProfileImage] = useState<File | null>(null);
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   const updateProfile = async () => {
     const formData = new FormData();
@@ -31,8 +31,6 @@ const EditProfileDialog = () => {
 
     // Aquí deberías llamar a tu API para actualizar el perfil
     // await api.updateProfile(formData);
-
-    setShowEditProfile(false);
   };
 
   return (
@@ -114,14 +112,7 @@ const EditProfileDialog = () => {
           <Button onClick={updateProfile} className="w-full">
             Save Changes
           </Button>
-          <Button
-            variant="destructive"
-            onClick={() => setShowDeleteConfirmation(true)}
-            className="w-full"
-          >
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete Profile
-          </Button>
+          <DeleteProfileConfirmationDialog />
         </div>
       </DialogContent>
     </Dialog>
