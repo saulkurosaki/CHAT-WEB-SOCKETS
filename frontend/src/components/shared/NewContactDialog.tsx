@@ -3,25 +3,23 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useState } from "react";
 
-const NewContactDialog = ({
-  showNewContactDialog,
-  setShowNewContactDialog,
-}) => {
+const NewContactDialog = () => {
   const [newContactInfo, setNewContactInfo] = useState("");
 
-  const addNewContact = () => {
-    // Lógica para agregar el nuevo contacto
-    setShowNewContactDialog(false);
-  };
+  const addNewContact = () => {};
 
   return (
-    <Dialog open={showNewContactDialog} onOpenChange={setShowNewContactDialog}>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button className="mt-4">Add New Contact</Button>
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add New Contact</DialogTitle>

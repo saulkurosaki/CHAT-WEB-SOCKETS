@@ -10,12 +10,9 @@ import { Button } from "../ui/button";
 import { UserPlus } from "lucide-react";
 import { ScrollArea } from "../ui/scroll-area";
 import { Avatar, AvatarFallback } from "../ui/avatar";
-import NewContactDialog from "./NewContactDialog"; // Importar el componente
+import NewContactDialog from "./NewContactDialog";
 
-const NewPersonalDialog = ({
-  showNewContactDialog,
-  setShowNewContactDialog,
-}) => {
+const NewPersonalDialog = () => {
   const [contacts, setContacts] = useState([]);
 
   const createPersonalChat = (contact) => {};
@@ -53,14 +50,9 @@ const NewPersonalDialog = ({
             </div>
           ))}
         </ScrollArea>
-        <Button onClick={() => setShowNewContactDialog(true)} className="mt-4">
-          Add New Contact
-        </Button>
+
+        <NewContactDialog />
       </DialogContent>
-      <NewContactDialog
-        showNewContactDialog={showNewContactDialog}
-        setShowNewContactDialog={setShowNewContactDialog}
-      />
     </Dialog>
   );
 };

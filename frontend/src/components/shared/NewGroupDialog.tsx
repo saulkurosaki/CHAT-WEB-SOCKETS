@@ -11,21 +11,25 @@ import { Camera, Plus, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { ScrollArea } from "../ui/scroll-area";
 import { Checkbox } from "../ui/checkbox";
+import { useState } from "react";
 
-const NewGroupDialog = ({
-  showNewGroupDialog,
-  setShowNewGroupDialog,
-  contacts,
-  newGroupName,
-  setNewGroupName,
-  newGroupImage,
-  setNewGroupImage,
-  selectedGroupMembers,
-  setSelectedGroupMembers,
-  createGroupChat,
-}) => {
+const NewGroupDialog = () => {
+  const [contacts, setContacts] = useState([]);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupImage, setNewGroupImage] = useState(null);
+  const [selectedGroupMembers, setSelectedGroupMembers] = useState([]);
+
+  const createGroupChat = () => {
+    if (newGroupName && selectedGroupMembers.length > 0) {
+      // Lógica para crear el grupo
+      setNewGroupName("");
+      setNewGroupImage(null);
+      setSelectedGroupMembers([]);
+    }
+  };
+
   return (
-    <Dialog open={showNewGroupDialog} onOpenChange={setShowNewGroupDialog}>
+    <Dialog>
       <DialogTrigger asChild>
         <Button className="w-[48%]">
           <Plus className="mr-2 h-4 w-4" /> New Group Chat

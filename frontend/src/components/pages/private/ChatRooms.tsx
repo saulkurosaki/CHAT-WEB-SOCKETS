@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 
 import { useNavigate } from "react-router-dom";
-import { Plus } from "lucide-react";
 
 import { useSearchStore } from "@/store";
 
@@ -9,13 +8,10 @@ import { generateChats, handleGetInitials } from "@/helpers";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 import { IChat } from "@/interfaces";
-import NewPersonalDialog from "@/components/shared/NewPersonalDialog";
-import NewContactDialog from "@/components/shared/NewContactDialog"; // Importar el componente
-import NewGroupDialog from "@/components/shared/NewGroupDialog";
+import Footer from "@/components/shared/Footer";
 
 export const ChatRooms = () => {
   const navigate = useNavigate();
@@ -23,28 +19,12 @@ export const ChatRooms = () => {
   const { search } = useSearchStore();
 
   const [chats, setChats] = useState<IChat[]>([]);
-  const [showNewContactDialog, setShowNewContactDialog] = useState(false); // Estado para el diálogo
-  const [showNewGroupDialog, setShowNewGroupDialog] = useState(false);
-  const [newGroupName, setNewGroupName] = useState("");
-  const [newGroupImage, setNewGroupImage] = useState(null);
-  const [selectedGroupMembers, setSelectedGroupMembers] = useState([]);
-  const [contacts, setContacts] = useState([]);
 
   useEffect(() => {
-    const generatedChats = generateChats(10);
+    const generatedChats = generateChats(20);
 
     setChats(generatedChats);
   }, []);
-
-  const createGroupChat = () => {
-    if (newGroupName && selectedGroupMembers.length > 0) {
-      // Lógica para crear el grupo
-      setNewGroupName("");
-      setNewGroupImage(null);
-      setSelectedGroupMembers([]);
-      setShowNewGroupDialog(false);
-    }
-  };
 
   const filteredChats = chats.filter((chat) =>
     chat.name.toLowerCase().includes(search.toLowerCase())
@@ -52,7 +32,10 @@ export const ChatRooms = () => {
 
   return (
     <>
-      <ScrollArea className="w-full flex-grow bg-gray-100">
+      <ScrollArea
+        className="w-full flex-grow bg-gray-100"
+        style={{ height: "calc(100vh - 100px)" }}
+      >
         {filteredChats.length > 0 ? (
           filteredChats.map((chat) => (
             <div
@@ -89,28 +72,7 @@ export const ChatRooms = () => {
         )}
       </ScrollArea>
 
-      <div className="w-full flex justify-between p-4 bg-gray-100">
-        <NewGroupDialog
-          showNewGroupDialog={showNewGroupDialog}
-          setShowNewGroupDialog={setShowNewGroupDialog}
-          contacts={contacts}
-          newGroupName={newGroupName}
-          setNewGroupName={setNewGroupName}
-          newGroupImage={newGroupImage}
-          setNewGroupImage={setNewGroupImage}
-          selectedGroupMembers={selectedGroupMembers}
-          setSelectedGroupMembers={setSelectedGroupMembers}
-          createGroupChat={createGroupChat}
-        />
-
-        <NewPersonalDialog setShowNewContactDialog={setShowNewContactDialog} />
-      </div>
-
-      {/* New Contact Dialog */}
-      <NewContactDialog
-        showNewContactDialog={showNewContactDialog}
-        setShowNewContactDialog={setShowNewContactDialog}
-      />
+      <Footer />
     </>
   );
 };
