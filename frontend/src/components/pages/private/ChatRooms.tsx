@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 import { useNavigate } from "react-router-dom";
-import { Plus, UserPlus } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { useSearchStore } from "@/store";
 
@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 
 import { IChat } from "@/interfaces";
 import NewPersonalDialog from "@/components/shared/NewPersonalDialog";
+import NewContactDialog from "@/components/shared/NewContactDialog"; // Importar el componente
 
 export const ChatRooms = () => {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export const ChatRooms = () => {
   const { search } = useSearchStore();
 
   const [chats, setChats] = useState<IChat[]>([]);
+  const [showNewContactDialog, setShowNewContactDialog] = useState(false); // Estado para el diálogo
 
   useEffect(() => {
     const generatedChats = generateChats(10);
@@ -76,8 +78,14 @@ export const ChatRooms = () => {
           <Plus className="mr-2 h-4 w-4" /> New Group Chat
         </Button>
 
-        <NewPersonalDialog />
+        <NewPersonalDialog setShowNewContactDialog={setShowNewContactDialog} />
       </div>
+
+      {/* New Contact Dialog */}
+      <NewContactDialog
+        showNewContactDialog={showNewContactDialog}
+        setShowNewContactDialog={setShowNewContactDialog}
+      />
     </>
   );
 };

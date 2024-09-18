@@ -10,14 +10,13 @@ import { Button } from "../ui/button";
 import { UserPlus } from "lucide-react";
 import { ScrollArea } from "../ui/scroll-area";
 import { Avatar, AvatarFallback } from "../ui/avatar";
+import NewContactDialog from "./NewContactDialog"; // Importar el componente
 
-const NewPersonalDialog = () => {
+const NewPersonalDialog = ({
+  showNewContactDialog,
+  setShowNewContactDialog,
+}) => {
   const [contacts, setContacts] = useState([]);
-  const [showNewContactDialog, setShowNewContactDialog] = useState(false);
-
-  const addNewContact = () => {
-    setShowNewContactDialog(false);
-  };
 
   const createPersonalChat = (contact) => {};
 
@@ -58,6 +57,10 @@ const NewPersonalDialog = () => {
           Add New Contact
         </Button>
       </DialogContent>
+      <NewContactDialog
+        showNewContactDialog={showNewContactDialog}
+        setShowNewContactDialog={setShowNewContactDialog}
+      />
     </Dialog>
   );
 };
