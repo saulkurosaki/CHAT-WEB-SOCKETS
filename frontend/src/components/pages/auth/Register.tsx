@@ -10,7 +10,7 @@ import { uploadImage } from "@/services/cloudinaryService";
 
 import { useUserStore } from "@/store";
 
-import { Spinner } from "@/components/ui/Spinner";
+import { Spinner } from "@/components/shared/Spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

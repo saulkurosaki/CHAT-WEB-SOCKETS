@@ -8,7 +8,7 @@ import { login } from "@/services";
 
 import { useUserStore } from "@/store";
 
-import { Spinner } from "@/components/ui/Spinner";
+import { Spinner } from "@/components/shared/Spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
