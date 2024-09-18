@@ -21,6 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import EditProfileDialog from "./EditProfileDialog";
+import ChatInfoDialog from "./ChatInfoDialog";
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -66,10 +67,7 @@ export const Header = () => {
 
       <div className="flex items-center space-x-4">
         {inChatRoom ? (
-          <Info
-            className="h-6 w-6 cursor-pointer"
-            onClick={() => setShowChatInfo(true)}
-          />
+          <ChatInfoDialog />
         ) : (
           <>
             <Search
