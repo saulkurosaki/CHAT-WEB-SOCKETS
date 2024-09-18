@@ -4,7 +4,6 @@ import { Outlet, useNavigate } from "react-router-dom";
 
 import { useUserStore } from "@/store";
 
-
 export const AuthLayout = () => {
   const navigate = useNavigate();
 
@@ -14,7 +13,7 @@ export const AuthLayout = () => {
     if (user) {
       navigate("/", { replace: true });
     }
-  }, [])
+  }, [user]);
 
   return (
     <div className="h-screen flex flex-col items-center justify-center p-4 bg-teal-600">
@@ -22,5 +21,5 @@ export const AuthLayout = () => {
         <Outlet />
       </div>
     </div>
-  )
-}
+  );
+};

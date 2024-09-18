@@ -26,7 +26,9 @@ export const Login = () => {
       password: "",
     },
     validationSchema: Yup.object({
-      emailOrUsername: Yup.string().email("Invalid email").required("Email is required"),
+      emailOrUsername: Yup.string()
+        .email("Invalid email")
+        .required("Email is required"),
       password: Yup.string().required("Password is required"),
     }),
     onSubmit: async (values) => {
@@ -34,47 +36,19 @@ export const Login = () => {
 
       const { ok, data, error } = await login(values);
 
-      if (!ok || error || !data ) {
-        toast.error(error || 'Login failed');
+      if (!ok || error || !data) {
+        toast.error(error || "Login failed");
         setIsLoading(false);
         return;
       }
 
-      toast.success('Successfully created!');
+      toast.success("Welcome Again!");
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
       setUser(data.user);
-      navigate("/", { replace: true }); 
+      navigate("/", { replace: true });
 
       setIsLoading(false);
-
-      // try {
-      //   const response = await fetch(
-      //     "http://localhost:3000/api/v1/auth/login",
-      //     {
-      //       method: "POST",
-      //       headers: {
-      //         "Content-Type": "application/json",
-      //       },
-      //       body: JSON.stringify(values),
-      //     }
-      //   );
-
-      //   if (!response.ok) {
-      //     throw new Error("Login failed");
-      //   }
-
-      //   const user = await response.json();
-      //   localStorage.setItem("token", user.token);
-      //   localStorage.setItem("user", JSON.stringify(user));
-      //   setUser(user);
-      //   navigate("/", { replace: true });
-      // } catch (error) {
-      //   console.error(error);
-      //   alert("Login failed. Please try again.");
-      // } finally {
-      //   setIsLoading(false);
-      // }
     },
   });
 

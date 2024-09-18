@@ -6,7 +6,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 
 import { register } from "@/services";
-import { uploadImage } from "@/services/cloudinaryService"; // Importa la función
+import { uploadImage } from "@/services/cloudinaryService";
 
 import { useUserStore } from "@/store";
 
@@ -53,15 +53,13 @@ export const Register = () => {
     onSubmit: async (values) => {
       setIsLoading(true);
       const formData = new FormData();
-      delete values.avatar; // Asegúrate de eliminar el avatar de los valores
+      delete values.avatar;
 
       if (profileImage) {
         // Validar el tipo de archivo
         const validTypes = ["image/jpeg", "image/png", "image/gif"];
         if (!validTypes.includes(profileImage.type)) {
-          toast.error(
-            "Formato de imagen no válido. Solo se permiten JPEG, PNG y GIF."
-          );
+          toast.error("Invalid image format. Only allowed JPEG, PNG y GIF.");
           setIsLoading(false);
           return;
         }
@@ -70,8 +68,8 @@ export const Register = () => {
           const avatarUrl = await uploadImage(profileImage); // Llama a la función para subir la imagen
           formData.append("avatar", avatarUrl); // Agregar la URL al FormData
         } catch (error) {
-          console.error("Error al subir la imagen:", error);
-          toast.error("Error al subir la imagen");
+          console.error("Error uploading the avatar image:", error);
+          toast.error("Error uploading the profile image");
           setIsLoading(false);
           return;
         }
@@ -85,10 +83,10 @@ export const Register = () => {
         }
       });
 
-      const { ok, data, error } = await register(formData); // Cambia aquí para pasar formData directamente
+      const { ok, data, error } = await register(formData);
 
       if (!ok || error || !data) {
-        toast.error(error || "Registro fallido");
+        toast.error(error || "There was an issue creating the account :(");
         setIsLoading(false);
         return;
       }

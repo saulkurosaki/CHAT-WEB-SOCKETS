@@ -1,24 +1,31 @@
-import { useState } from 'react';
+import { useState } from "react";
 
-import { useMatch, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Info, LogOut, MoreVertical, Search, User } from 'lucide-react'
+import { useMatch, useNavigate } from "react-router-dom";
+import {
+  ArrowLeft,
+  Info,
+  LogOut,
+  MoreVertical,
+  Search,
+  User,
+} from "lucide-react";
 
-import { useSearchStore, useUserStore } from '@/store';
+import { useSearchStore, useUserStore } from "@/store";
 
-import { handleGetInitials } from '@/helpers';
+import { handleGetInitials } from "@/helpers";
 
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 
-import { Popover, PopoverContent, PopoverTrigger } from './popover';
-import { Avatar, AvatarFallback, AvatarImage } from './avatar'
-import { Button } from './button';
-import { Input } from './input';
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
+import { Button } from "./button";
+import { Input } from "./input";
 
 export const Header = () => {
   const navigate = useNavigate();
-  const inChatRoom = useMatch('/chat/:id');
+  const inChatRoom = useMatch("/chat/:id");
 
-  const { user } = useUserStore();
+  const { user, setUser } = useUserStore();
   const { search, setSearch } = useSearchStore();
 
   const [showSearch, setShowSearch] = useState(false);
@@ -27,16 +34,17 @@ export const Header = () => {
   const handleToggleSearch = () => {
     setShowSearch(!showSearch);
     if (showSearch) setSearch("");
-  }
+  };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
-  }
+  };
 
   const handleLogout = () => {
     localStorage.clear();
+    setUser(null);
     navigate("/auth/login", { replace: true });
-  }
+  };
 
   return (
     <div className="flex items-center justify-between text-white p-4 bg-teal-600">
@@ -47,7 +55,7 @@ export const Header = () => {
             onClick={() => navigate("/")}
           />
         )}
-        
+
         <button onClick={() => navigate("/")}>
           <h1 className="text-2xl font-bold">
             {inChatRoom ? `${user?.name}` : "Chats"}
@@ -70,8 +78,10 @@ export const Header = () => {
 
             <div
               className={cn(
-                'grid transform transition-all duration-300 ease-in-out overflow-hidden',
-                showSearch ? 'grid-cols-[1fr] opacity-100' : 'grid-cols-[0fr] opacity-0 !m-0'
+                "grid transform transition-all duration-300 ease-in-out overflow-hidden",
+                showSearch
+                  ? "grid-cols-[1fr] opacity-100"
+                  : "grid-cols-[0fr] opacity-0 !m-0"
               )}
             >
               <div className="overflow-hidden rounded-md">
@@ -88,11 +98,8 @@ export const Header = () => {
         )}
 
         <Avatar className="h-8 w-8">
-          {user?.profileImage ? (
-            <AvatarImage
-              src={user?.profileImage}
-              alt={user.name}
-            />
+          {user?.avatar ? (
+            <AvatarImage src={user?.avatar} alt={user.name} />
           ) : (
             <AvatarFallback>{handleGetInitials(user?.name)}</AvatarFallback>
           )}
@@ -127,5 +134,5 @@ export const Header = () => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
