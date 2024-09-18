@@ -15,14 +15,10 @@ export const router = createBrowserRouter([
         element: <ChatRooms />,
       },
       {
-        path: 'chat/:id',
+        path: "chat/:id",
         element: <div>Chat Room</div>,
       },
-      {
-        path: 'profile',
-        element: <div>Profile</div>,
-      },
-    ]
+    ],
   },
   {
     path: "/auth",
@@ -37,6 +33,6 @@ export const router = createBrowserRouter([
         path: "register",
         element: <Register />,
       },
-    ]
+    ],
   },
 ]);

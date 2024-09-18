@@ -20,6 +20,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import EditProfileDialog from "./EditProfileDialog";
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -112,14 +113,8 @@ export const Header = () => {
             </PopoverTrigger>
             <PopoverContent className="w-56">
               <div className="flex flex-col space-y-2">
-                <Button
-                  variant="ghost"
-                  className="justify-start"
-                  onClick={() => navigate("/profile")}
-                >
-                  <User className="mr-2 h-4 w-4" />
-                  Edit Profile
-                </Button>
+                <EditProfileDialog />
+
                 <Button
                   variant="ghost"
                   className="justify-start"
