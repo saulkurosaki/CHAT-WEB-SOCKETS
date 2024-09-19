@@ -3,6 +3,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { AuthLayout, RootLayout } from "@/components/layouts";
 import { Login, Register } from "@/components/pages/auth";
 import { ChatRooms } from "@/components/pages/private";
+import ChatRoom from "@/components/shared/ChatRoom";
 
 export const router = createBrowserRouter([
   {
@@ -16,7 +17,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "chat/:id",
-        element: <div>Chat Room</div>,
+        element: <ChatRoom />,
       },
     ],
   },
