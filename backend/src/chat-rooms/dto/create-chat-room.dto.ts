@@ -3,7 +3,6 @@ import { IsOptional, IsString, MinLength, IsEnum, IsMongoId, IsDefined, IsObject
 import { RoleName } from "src/roles/entities/role.entity";
 
 export class CreateChatRoomDto {
-
     @IsString()
     @MinLength(2)
     name: string;
@@ -16,11 +15,6 @@ export class CreateChatRoomDto {
     @IsString()
     @IsEnum(ChatRoomType)
     chatRoomType: ChatRoomType;
-
-    @IsMongoId()
-    @IsString()
-    @IsDefined()
-    createdBy: string;
 
     @IsObject()
     @IsValidKeyObjectId() // Validamos que las claves sean ObjectIds
