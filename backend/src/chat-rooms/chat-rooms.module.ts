@@ -3,9 +3,8 @@ import { ChatRoomsService } from './chat-rooms.service';
 import { ChatRoomsController } from './chat-rooms.controller';
 import { ChatRoom, ChatRoomSchema } from './entities/chat-room.entity';
 import { MongooseModule } from '@nestjs/mongoose';
-import { AuthModule } from 'src/auth/auth.module';
 import { UsersModule } from 'src/users/users.module';
-
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   controllers: [ChatRoomsController],
@@ -15,7 +14,8 @@ import { UsersModule } from 'src/users/users.module';
       { name: ChatRoom.name, schema: ChatRoomSchema },
     ]),
     AuthModule,
-    UsersModule,
+    UsersModule
   ],
+  exports: [ChatRoomsService]
 })
 export class ChatRoomsModule { }
