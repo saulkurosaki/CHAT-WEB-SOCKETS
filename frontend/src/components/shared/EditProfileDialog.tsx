@@ -16,10 +16,12 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import DeleteProfileConfirmationDialog from "./DeleteProfileConfirmationDialog";
+import toast from "react-hot-toast";
 
 const EditProfileDialog = () => {
   const { user, setUser } = useUserStore();
   const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [isOpen, setIsOpen] = useState(false); // Agregar estado para controlar el diálogo
 
   const formik = useFormik({
     initialValues: {
@@ -27,8 +29,9 @@ const EditProfileDialog = () => {
       lastname: "",
       username: "",
       phone: "",
+      avatar: null,
     },
-    enableReinitialize: true, // Permite que los valores iniciales se actualicen
+    enableReinitialize: true,
     validationSchema: Yup.object({
       name: Yup.string().optional(),
       lastname: Yup.string().optional(),
@@ -46,12 +49,19 @@ const EditProfileDialog = () => {
       if (values.phone) userData.phone = values.phone;
 
       if (profileImage) {
+        const validTypes = ["image/jpeg", "image/png", "image/gif"];
+        if (!validTypes.includes(profileImage.type)) {
+          toast.error("Invalid image format. Only allowed JPEG, PNG y GIF.");
+          return;
+        }
+
         try {
           const avatarUrl = await uploadImage(profileImage);
           userData.avatar = avatarUrl; // Agregar la URL de la imagen al objeto de datos
         } catch (error) {
           console.error("Error uploading the avatar image:", error);
-          return; // Manejar el error de subida
+          toast.error("Error uploading the profile image");
+          return;
         }
       }
 
@@ -59,8 +69,9 @@ const EditProfileDialog = () => {
         try {
           const response = await updateUser(userId, userData);
           if (response.ok) {
-            console.log("Perfil actualizado con éxito:", response.data);
             setUser({ ...user, ...response.data }); // Actualizar el usuario en el store
+            toast.success("Successfully updated!");
+            handleClose(); // Cerrar el diálogo después de la actualización
           }
         } catch (error) {
           console.error("Error al actualizar el perfil:", error);
@@ -69,8 +80,14 @@ const EditProfileDialog = () => {
     },
   });
 
+  const handleClose = () => {
+    setIsOpen(false); // Función para cerrar el diálogo
+  };
+
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      {" "}
+      {/* Controlar el estado del diálogo */}
       <DialogTrigger asChild>
         <Button variant="ghost" className="justify-start">
           <User className="mr-2 h-4 w-4" />
