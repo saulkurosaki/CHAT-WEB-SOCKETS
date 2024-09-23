@@ -51,3 +51,27 @@ export const saveContact = async (
     };
   }
 };
+
+export const updateUser = async (
+  userId: string,
+  userData: any
+): Promise<IResponse<any>> => {
+  try {
+    const response = await axiosInstance.patch(`/users/${userId}`, userData);
+    return {
+      ok: true,
+      data: response.data,
+    };
+  } catch (error: unknown | AxiosError) {
+    let errorMessage = "Error al actualizar el usuario";
+
+    if (error instanceof AxiosError) {
+      errorMessage = error.response?.data?.message || errorMessage;
+    }
+
+    return {
+      ok: false,
+      error: errorMessage,
+    };
+  }
+};
