@@ -9,12 +9,15 @@ import {
 } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { useState } from "react";
-import { useUserStore } from "@/store"; // Asegúrate de importar useUserStore
-import { deleteProfile } from "@/services/private"; // Importa la función deleteProfile
+import { useUserStore } from "@/store";
+import { deleteProfile } from "@/services/private";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const DeleteProfileConfirmationDialog = () => {
-  const { user } = useUserStore();
+  const { user, setUser } = useUserStore();
   const [confirmPassword, setConfirmPassword] = useState("");
+  const navigate = useNavigate();
 
   const deleteProfileHandler = async () => {
     if (user) {
@@ -24,11 +27,24 @@ const DeleteProfileConfirmationDialog = () => {
         confirmPassword
       );
       if (response.ok) {
-        // Manejar la eliminación exitosa (por ejemplo, redirigir o mostrar un mensaje)
-        console.log("Perfil eliminado con éxito");
+        toast.success("Successfully deleted! See you next time pal :D");
+        setTimeout(() => {
+          // Redirige a la página de Login después de 1 segundo
+          localStorage.clear();
+          setUser(null);
+          navigate("/auth/login", { replace: true });
+        }, 1000);
       } else {
-        // Manejar el error
-        console.error(response.error);
+        const errorMessage = response.error || "Error desconocido";
+        if (errorMessage === "Las contraseñas no coinciden") {
+          toast.error("Ohh Sorry, Passwords doesn't match :(");
+        } else if (errorMessage === "Error al eliminar el perfil") {
+          toast.error(
+            "There was a problem deleting your profile, try again later!"
+          );
+        } else {
+          toast.error(errorMessage); // Manejo de otros errores
+        }
       }
     }
   };
