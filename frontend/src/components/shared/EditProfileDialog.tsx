@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Camera, Trash2, User, X } from "lucide-react";
+import { useUserStore } from "@/store";
+import { updateUser } from "@/services/private";
+import { Camera, User, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +15,7 @@ import { Button } from "../ui/button";
 import DeleteProfileConfirmationDialog from "./DeleteProfileConfirmationDialog";
 
 const EditProfileDialog = () => {
+  const { user } = useUserStore();
   const [name, setName] = useState("");
   const [lastname, setLastname] = useState("");
   const [username, setUsername] = useState("");
@@ -20,17 +23,38 @@ const EditProfileDialog = () => {
   const [profileImage, setProfileImage] = useState<File | null>(null);
 
   const updateProfile = async () => {
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("lastname", lastname);
-    formData.append("username", username);
-    formData.append("phone", phoneNumber);
+    const userId = user?._id; // Obtener el ID del usuario
+
+    const userData: any = {};
+    if (name) userData.name = name;
+    if (lastname) userData.lastname = lastname;
+    if (username) userData.username = username;
+    if (phoneNumber) userData.phone = phoneNumber;
     if (profileImage) {
-      formData.append("avatar", profileImage);
+      // Aquí podrías manejar la subida de la imagen si es necesario
+      // Por ejemplo, subir la imagen a un servicio y luego agregar la URL a userData
     }
 
-    // Aquí deberías llamar a tu API para actualizar el perfil
-    // await api.updateProfile(formData);
+    if (userId) {
+      try {
+        const response = await updateUser(userId, userData);
+        if (response.ok) {
+          // Manejo de la respuesta exitosa
+          console.log("Perfil actualizado con éxito:", response.data);
+          // Aquí podrías cerrar el diálogo o mostrar un mensaje de éxito
+        } else {
+          throw new Error(response.error || "Error al actualizar el perfil");
+        }
+      } catch (error) {
+        // Manejo de errores
+        if (error instanceof Error) {
+          console.error("Error al actualizar el perfil:", error.message);
+        } else {
+          console.error("Error al actualizar el perfil:", error);
+        }
+        // Aquí podrías mostrar un mensaje de error al usuario
+      }
+    }
   };
 
   return (
@@ -89,7 +113,9 @@ const EditProfileDialog = () => {
                 id="edit-profile-image"
                 type="file"
                 className="hidden"
-                onChange={(e) => setProfileImage(e.target.files[0])}
+                onChange={(e) =>
+                  e.target.files && setProfileImage(e.target.files[0])
+                }
               />
             </Label>
             {profileImage && (
