@@ -9,11 +9,29 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useState } from "react";
+import { findContactByEmail, saveContact } from "@/services/private";
 
 const NewContactDialog = () => {
-  const [newContactInfo, setNewContactInfo] = useState("");
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
 
-  const addNewContact = () => {};
+  const addNewContact = async () => {
+    const response = await findContactByEmail(email);
+    if (response.ok) {
+      const userData = response.data; // Información del usuario encontrado
+      const saveResponse = await saveContact(userData); // Guardar el contacto
+
+      if (saveResponse.ok) {
+        console.log("Contacto guardado:", saveResponse.data);
+        setEmail(""); // Limpiar el input
+        setError(""); // Limpiar el error
+      } else {
+        setError(saveResponse.error || "Error al guardar el contacto");
+      }
+    } else {
+      setError(response.error || "Error al agregar contacto");
+    }
+  };
 
   return (
     <Dialog>
@@ -26,13 +44,14 @@ const NewContactDialog = () => {
         </DialogHeader>
         <div className="space-y-4">
           <div>
-            <Label htmlFor="new-contact-info">Email or Phone Number</Label>
+            <Label htmlFor="new-contact-email">Email</Label>
             <Input
-              id="new-contact-info"
-              value={newContactInfo}
-              onChange={(e) => setNewContactInfo(e.target.value)}
-              placeholder="Enter email or phone number"
+              id="new-contact-email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="ejemplo@correo.com"
             />
+            {error && <p className="text-red-500">{error}</p>}
           </div>
           <Button onClick={addNewContact} className="w-full">
             Add Contact
