@@ -9,11 +9,29 @@ import {
 } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { useState } from "react";
+import { useUserStore } from "@/store"; // Asegúrate de importar useUserStore
+import { deleteProfile } from "@/services/private"; // Importa la función deleteProfile
 
 const DeleteProfileConfirmationDialog = () => {
-  const [deletePassword, setDeletePassword] = useState();
+  const { user } = useUserStore();
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const deleteProfile = () => {};
+  const deleteProfileHandler = async () => {
+    if (user) {
+      const response = await deleteProfile(
+        user._id,
+        user.password,
+        confirmPassword
+      );
+      if (response.ok) {
+        // Manejar la eliminación exitosa (por ejemplo, redirigir o mostrar un mensaje)
+        console.log("Perfil eliminado con éxito");
+      } else {
+        // Manejar el error
+        console.error(response.error);
+      }
+    }
+  };
 
   return (
     <Dialog>
@@ -31,13 +49,13 @@ const DeleteProfileConfirmationDialog = () => {
           <p>Please enter your password to confirm profile deletion:</p>
           <Input
             type="password"
-            value={deletePassword}
-            onChange={(e) => setDeletePassword(e.target.value)}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Enter your password"
           />
           <Button
             variant="destructive"
-            onClick={deleteProfile}
+            onClick={deleteProfileHandler}
             className="w-full"
           >
             Confirm Deletion
