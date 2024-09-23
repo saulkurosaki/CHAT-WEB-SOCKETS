@@ -9,18 +9,25 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useState } from "react";
-import { addContactByEmail } from "@/services/private";
+import { findContactByEmail, saveContact } from "@/services/private";
 
 const NewContactDialog = () => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
 
   const addNewContact = async () => {
-    const response = await addContactByEmail(email);
+    const response = await findContactByEmail(email);
     if (response.ok) {
-      console.log("Contacto agregado:", response.data);
-      setEmail("");
-      setError("");
+      const userData = response.data; // Información del usuario encontrado
+      const saveResponse = await saveContact(userData); // Guardar el contacto
+
+      if (saveResponse.ok) {
+        console.log("Contacto guardado:", saveResponse.data);
+        setEmail(""); // Limpiar el input
+        setError(""); // Limpiar el error
+      } else {
+        setError(saveResponse.error || "Error al guardar el contacto");
+      }
     } else {
       setError(response.error || "Error al agregar contacto");
     }
@@ -42,7 +49,7 @@ const NewContactDialog = () => {
               id="new-contact-email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="friends@email.com"
+              placeholder="ejemplo@correo.com"
             />
             {error && <p className="text-red-500">{error}</p>}
           </div>
