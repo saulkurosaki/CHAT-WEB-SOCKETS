@@ -9,11 +9,45 @@ import {
 } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { useState } from "react";
+import { useUserStore } from "@/store";
+import { deleteProfile } from "@/services/private";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const DeleteProfileConfirmationDialog = () => {
-  const [deletePassword, setDeletePassword] = useState();
+  const { user, setUser } = useUserStore();
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const navigate = useNavigate();
 
-  const deleteProfile = () => {};
+  const deleteProfileHandler = async () => {
+    if (user) {
+      const response = await deleteProfile(
+        user._id,
+        user.password,
+        confirmPassword
+      );
+      if (response.ok) {
+        toast.success("Successfully deleted! See you next time pal :D");
+        setTimeout(() => {
+          // Redirige a la página de Login después de 1 segundo
+          localStorage.clear();
+          setUser(null);
+          navigate("/auth/login", { replace: true });
+        }, 1000);
+      } else {
+        const errorMessage = response.error || "Error desconocido";
+        if (errorMessage === "Las contraseñas no coinciden") {
+          toast.error("Ohh Sorry, Passwords doesn't match :(");
+        } else if (errorMessage === "Error al eliminar el perfil") {
+          toast.error(
+            "There was a problem deleting your profile, try again later!"
+          );
+        } else {
+          toast.error(errorMessage); // Manejo de otros errores
+        }
+      }
+    }
+  };
 
   return (
     <Dialog>
@@ -31,13 +65,13 @@ const DeleteProfileConfirmationDialog = () => {
           <p>Please enter your password to confirm profile deletion:</p>
           <Input
             type="password"
-            value={deletePassword}
-            onChange={(e) => setDeletePassword(e.target.value)}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Enter your password"
           />
           <Button
             variant="destructive"
-            onClick={deleteProfile}
+            onClick={deleteProfileHandler}
             className="w-full"
           >
             Confirm Deletion
