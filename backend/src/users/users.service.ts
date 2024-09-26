@@ -1,21 +1,27 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from './entities/user.entity';
+import { ContactSchema, User } from './entities/user.entity';
 import { isValidObjectId, Model } from 'mongoose';
 import { hashSync } from 'bcryptjs';
+
+export enum ShowContacts {
+  FULL = 'full',
+  LIST = 'list',
+}
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name)
     private readonly userModel: Model<User>,
-  ) {}
+  ) { }
 
   async findByEmail(email: string) {
     const user = await this.userModel.findOne({ email });
@@ -72,6 +78,30 @@ export class UsersService {
     if (!user) throw new BadRequestException(`User with ${term} not found`);
 
     return user;
+  }
+  async findContacts(term: string, contacts: ShowContacts) {
+    const user = await this.findOne(term);
+
+    if (contacts === ShowContacts.LIST) {
+      return Object.keys(user.contacts);
+    }
+
+    if (contacts === ShowContacts.FULL) {
+      return user.contacts;
+    }
+
+    return new InternalServerErrorException('Check logs - Talk with an administrator');
+  }
+
+  async addContact(term: string, updateUserDto: UpdateUserDto) {
+
+    const user = await this.findOne(term);
+
+    const newContacts = { ...user.contacts, ...updateUserDto.contacts };
+
+    const updatedUser = await this.update(user.id, { contacts: newContacts });
+
+    return updatedUser;
   }
 
   async update(term: string, updateUserDto: UpdateUserDto) {
