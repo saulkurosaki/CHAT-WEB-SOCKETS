@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,9 +11,27 @@ import { UserPlus } from "lucide-react";
 import { ScrollArea } from "../ui/scroll-area";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import NewContactDialog from "./NewContactDialog";
+import { listContacts } from "@/services/private"; // Importa la nueva función
+import { useUserStore } from "@/store";
 
 const NewPersonalDialog = () => {
   const [contacts, setContacts] = useState([]);
+  const { user } = useUserStore();
+
+  useEffect(() => {
+    const fetchContacts = async () => {
+      if (user?.email) {
+        const response = await listContacts(user?.email);
+        if (response.ok) {
+          setContacts(response.data); // Asigna los contactos obtenidos
+        } else {
+          console.error(response.error);
+        }
+      }
+    };
+
+    fetchContacts();
+  }, [user?.email]);
 
   const createPersonalChat = (contact) => {};
 
