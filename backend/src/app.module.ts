@@ -13,15 +13,15 @@ import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET,
       signOptions: {
         expiresIn: '2h',
       },
-    }),
-    ConfigModule.forRoot({
-      isGlobal: true,
     }),
     MongooseModule.forRoot('mongodb://root:example@localhost:27017/db_chats?authSource=admin'),
     UsersModule,
