@@ -11,12 +11,12 @@ import { UserPlus } from "lucide-react";
 import { ScrollArea } from "../ui/scroll-area";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import NewContactDialog from "./NewContactDialog";
-import { listContacts } from "@/services/private"; // Importa la nueva función
+import { listContacts, deleteContact } from "@/services/private"; // Importa la nueva función
 import { useUserStore } from "@/store";
 
 const NewPersonalDialog = () => {
   const [contacts, setContacts] = useState([]);
-  const { user } = useUserStore();
+  const { user, setUser } = useUserStore();
 
   useEffect(() => {
     const fetchContacts = async () => {
@@ -32,6 +32,22 @@ const NewPersonalDialog = () => {
 
     fetchContacts();
   }, [user]);
+
+  const handleDeleteContact = async (contactId) => {
+    if (user?.email) {
+      const response = await deleteContact(user.email, contactId);
+      if (response.ok) {
+        // Actualiza los contactos después de eliminar
+        // setContacts((prevContacts) => prevContacts.filter(contact => contact._id !== contactId));
+
+        // Actualiza el usuario en el store si es necesario
+        setUser({ ...user, ...response.data });
+        console.log(user);
+      } else {
+        console.error(response.error);
+      }
+    }
+  };
 
   const createPersonalChat = (contact) => {};
 
@@ -58,13 +74,24 @@ const NewPersonalDialog = () => {
           {contacts.map((contact) => (
             <div
               key={contact._id}
-              className="flex items-center p-2 cursor-pointer hover:bg-gray-100"
+              className="flex items-center p-2 cursor-pointer hover:bg-gray-100 justify-between"
               onClick={() => createPersonalChat(contact)}
             >
-              <Avatar className="h-10 w-10 mr-3">
-                <AvatarFallback>{getInitials(contact.name)}</AvatarFallback>
-              </Avatar>
-              <span>{contact.name}</span>
+              <div className="flex items-center">
+                <Avatar className="h-10 w-10 mr-3">
+                  <AvatarFallback>{getInitials(contact.name)}</AvatarFallback>
+                </Avatar>
+                <span>{contact.name}</span>
+              </div>
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation(); // Evita que se active el evento de clic en el contacto
+                  handleDeleteContact(contact._id);
+                }}
+                className="w-7 h-auto ml-2 text-gray-500 bg-transparent rounded-full p-1 hover:text-red-500 bg-none"
+              >
+                X
+              </Button>
             </div>
           ))}
         </ScrollArea>
