@@ -149,3 +149,29 @@ export const listContacts = async (
     };
   }
 };
+
+export const deleteContact = async (
+  userEmail: string,
+  contactId: string
+): Promise<IResponse<any>> => {
+  try {
+    const response = await axiosInstance.delete(
+      `/users/${userEmail}/contacts/${contactId}`
+    );
+    return {
+      ok: true,
+      data: response.data,
+    };
+  } catch (error: unknown | AxiosError) {
+    let errorMessage = "Error al eliminar el contacto";
+
+    if (error instanceof AxiosError) {
+      errorMessage = error.response?.data?.message || errorMessage;
+    }
+
+    return {
+      ok: false,
+      error: errorMessage,
+    };
+  }
+};
