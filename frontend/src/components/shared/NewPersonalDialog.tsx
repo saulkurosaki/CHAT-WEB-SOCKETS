@@ -9,10 +9,11 @@ import {
 import { Button } from "../ui/button";
 import { UserPlus } from "lucide-react";
 import { ScrollArea } from "../ui/scroll-area";
-import { Avatar, AvatarFallback } from "../ui/avatar";
-import NewContactDialog from "./NewContactDialog";
-import { listContacts, deleteContact } from "@/services/private"; // Importa la nueva función
+import ContactCard from "./ContactCard"; // Importa el nuevo componente
+import { listContacts, deleteContact } from "@/services/private"; // Importa las funciones
 import { useUserStore } from "@/store";
+import NewContactDialog from "./NewContactDialog";
+import toast from "react-hot-toast";
 
 const NewPersonalDialog = () => {
   const [contacts, setContacts] = useState([]);
@@ -37,26 +38,16 @@ const NewPersonalDialog = () => {
     if (user?.email) {
       const response = await deleteContact(user.email, contactId);
       if (response.ok) {
-        // Actualiza los contactos después de eliminar
-        // setContacts((prevContacts) => prevContacts.filter(contact => contact._id !== contactId));
-
-        // Actualiza el usuario en el store si es necesario
         setUser({ ...user, ...response.data });
-        console.log(user);
+        toast.success("Contact deleted successfully!");
       } else {
         console.error(response.error);
       }
     }
   };
 
-  const createPersonalChat = (contact) => {};
-
-  const getInitials = (name) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
+  const createPersonalChat = (contact) => {
+    // Lógica para crear un chat personal
   };
 
   return (
@@ -72,27 +63,12 @@ const NewPersonalDialog = () => {
         </DialogHeader>
         <ScrollArea className="h-[300px] mt-4">
           {contacts.map((contact) => (
-            <div
+            <ContactCard
               key={contact._id}
-              className="flex items-center p-2 cursor-pointer hover:bg-gray-100 justify-between"
+              contact={contact}
+              onDelete={handleDeleteContact}
               onClick={() => createPersonalChat(contact)}
-            >
-              <div className="flex items-center">
-                <Avatar className="h-10 w-10 mr-3">
-                  <AvatarFallback>{getInitials(contact.name)}</AvatarFallback>
-                </Avatar>
-                <span>{contact.name}</span>
-              </div>
-              <Button
-                onClick={(e) => {
-                  e.stopPropagation(); // Evita que se active el evento de clic en el contacto
-                  handleDeleteContact(contact._id);
-                }}
-                className="w-7 h-auto ml-2 text-gray-500 bg-transparent rounded-full p-1 hover:text-red-500 bg-none"
-              >
-                X
-              </Button>
-            </div>
+            />
           ))}
         </ScrollArea>
 

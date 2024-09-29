@@ -28,6 +28,8 @@ const NewContactDialog = () => {
       if (saveResponse.ok) {
         setUser({ ...user, ...saveResponse.data });
         toast.success("Contact successfully added to your list");
+        setEmail(""); // Limpiar el input
+        setError(""); // Limpiar el error
         handleClose();
       } else {
         setError(saveResponse.error || "Error al guardar el contacto");
