@@ -26,7 +26,6 @@ const NewContactDialog = () => {
       const saveResponse = await saveContact(user?.email!, contactId); // Guardar el contacto
 
       if (saveResponse.ok) {
-        console.log("Contacto guardado:", saveResponse.data);
         setUser({ ...user, ...saveResponse.data });
         toast.success("Contact successfully added to your list");
         handleClose();

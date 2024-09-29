@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -31,7 +31,7 @@ const NewPersonalDialog = () => {
     };
 
     fetchContacts();
-  }, [user?.email]);
+  }, [user]);
 
   const createPersonalChat = (contact) => {};
 
