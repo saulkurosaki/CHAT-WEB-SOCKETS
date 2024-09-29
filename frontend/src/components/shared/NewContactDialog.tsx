@@ -17,6 +17,7 @@ const NewContactDialog = () => {
   const { user, setUser } = useUserStore();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
 
   const addNewContact = async () => {
     const response = await findContactByEmail(email);
@@ -28,8 +29,7 @@ const NewContactDialog = () => {
         console.log("Contacto guardado:", saveResponse.data);
         setUser({ ...user, ...saveResponse.data });
         toast.success("Contact successfully added to your list");
-        setEmail(""); // Limpiar el input
-        setError(""); // Limpiar el error
+        handleClose();
       } else {
         setError(saveResponse.error || "Error al guardar el contacto");
       }
@@ -38,8 +38,12 @@ const NewContactDialog = () => {
     }
   };
 
+  const handleClose = () => {
+    setIsOpen(false);
+  };
+
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className="mt-4">Add New Contact</Button>
       </DialogTrigger>
