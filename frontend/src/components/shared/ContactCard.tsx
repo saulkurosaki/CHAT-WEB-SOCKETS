@@ -5,18 +5,15 @@ interface ContactCardProps {
   contact: {
     _id: string;
     name: string;
+    lastname: string; // Agrega el apellido aquí
   };
   onDelete: (contactId: string) => void;
   onClick: () => void;
 }
 
 const ContactCard = ({ contact, onDelete, onClick }: ContactCardProps) => {
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
+  const getInitials = (name: string, lastname: string) => {
+    return (name.charAt(0) + lastname.charAt(0)).toUpperCase(); // Cambia para incluir las iniciales del apellido
   };
 
   return (
@@ -27,9 +24,14 @@ const ContactCard = ({ contact, onDelete, onClick }: ContactCardProps) => {
     >
       <div className="flex items-center">
         <Avatar className="h-10 w-10 mr-3">
-          <AvatarFallback>{getInitials(contact.name)}</AvatarFallback>
+          <AvatarFallback>
+            {getInitials(contact.name, contact.lastname)}
+          </AvatarFallback>
         </Avatar>
-        <span>{contact.name}</span>
+        <span>
+          {contact.name} {contact.lastname}
+        </span>{" "}
+        {/* Muestra el nombre y el apellido */}
       </div>
       <Button
         onClick={(e) => {
