@@ -32,10 +32,22 @@ export const findContactByEmail = async (
 
 // Nueva función para guardar el contacto
 export const saveContact = async (
-  contactData: any
+  userEmail: string,
+  contactId: string
 ): Promise<IResponse<any>> => {
+  const contactData = {
+    contacts: {
+      [contactId]: {
+        isBlocked: false,
+      },
+    },
+  };
+
   try {
-    const response = await axiosInstance.post(`/contacts/save`, contactData); // Endpoint ficticio
+    const response = await axiosInstance.patch(
+      `/users/${userEmail}/contacts`,
+      contactData
+    );
     return {
       ok: true,
       data: response.data,
