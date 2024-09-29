@@ -124,3 +124,28 @@ export const deleteProfile = async (
     };
   }
 };
+
+export const listContacts = async (
+  userEmail: string
+): Promise<IResponse<any>> => {
+  try {
+    const response = await axiosInstance.get(
+      `/users/${userEmail}/contacts?show=full`
+    );
+    return {
+      ok: true,
+      data: response.data,
+    };
+  } catch (error: unknown | AxiosError) {
+    let errorMessage = "Error al obtener los contactos";
+
+    if (error instanceof AxiosError) {
+      errorMessage = error.response?.data?.message || errorMessage;
+    }
+
+    return {
+      ok: false,
+      error: errorMessage,
+    };
+  }
+};
