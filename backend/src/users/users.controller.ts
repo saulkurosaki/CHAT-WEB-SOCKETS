@@ -67,4 +67,8 @@ export class UsersController {
   removeContact(@Param('term') term: string, @Param('id') id: string) {
     return this.usersService.removeContact(term, id);
   }
+  @Get(':userId/chat-rooms')
+  getUserChatRooms(@Param('userId') userId: string) {
+    return this.usersService.getUserChatRooms(userId);
+  }
 }

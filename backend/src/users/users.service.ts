@@ -12,6 +12,7 @@ import { isValidObjectId, Model, Types } from 'mongoose';
 import { hashSync } from 'bcryptjs';
 
 import mongoose from 'mongoose';
+import { ChatRoom } from 'src/chat-rooms/entities/chat-room.entity';
 const { ObjectId } = mongoose.Types;
 
 export enum ShowContacts {
@@ -24,6 +25,8 @@ export class UsersService {
   constructor(
     @InjectModel(User.name)
     private readonly userModel: Model<User>,
+    @InjectModel(ChatRoom.name)
+    private readonly chatRoomModel: Model<ChatRoom>,
   ) { }
 
   async findByEmail(email: string) {
@@ -163,5 +166,23 @@ export class UsersService {
     const updatedUser = await this.update(user.id, { contacts: user.contacts });
 
     return updatedUser;
+  }
+  async getUserChatRooms(userId: string) {
+  
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+  
+    const chatRooms = await this.chatRoomModel.find({
+      [`members.${userId}`]: { $exists: true }
+    });
+  
+    console.log(`Chatrooms encontrados: ${chatRooms.length}`);
+  
+    // Extraemos solo los IDs de los chatrooms
+    const chatRoomIds = chatRooms.map(room => room._id.toString());
+  
+    return { [userId]: chatRoomIds };
   }
 }
