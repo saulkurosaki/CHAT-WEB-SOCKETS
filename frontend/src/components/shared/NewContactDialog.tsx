@@ -10,21 +10,27 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { findContactByEmail, saveContact } from "@/services/private";
+import { useUserStore } from "@/store";
+import toast from "react-hot-toast";
 
 const NewContactDialog = () => {
+  const { user, setUser } = useUserStore();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
 
   const addNewContact = async () => {
     const response = await findContactByEmail(email);
     if (response.ok) {
-      const userData = response.data; // Información del usuario encontrado
-      const saveResponse = await saveContact(userData); // Guardar el contacto
+      const contactId = response.data._id; // Id del usuario encontrado
+      const saveResponse = await saveContact(user?.email!, contactId); // Guardar el contacto
 
       if (saveResponse.ok) {
-        console.log("Contacto guardado:", saveResponse.data);
+        setUser({ ...user, ...saveResponse.data });
+        toast.success("Contact successfully added to your list");
         setEmail(""); // Limpiar el input
         setError(""); // Limpiar el error
+        handleClose();
       } else {
         setError(saveResponse.error || "Error al guardar el contacto");
       }
@@ -33,8 +39,12 @@ const NewContactDialog = () => {
     }
   };
 
+  const handleClose = () => {
+    setIsOpen(false);
+  };
+
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className="mt-4">Add New Contact</Button>
       </DialogTrigger>

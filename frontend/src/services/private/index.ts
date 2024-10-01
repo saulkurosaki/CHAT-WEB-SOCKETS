@@ -32,10 +32,22 @@ export const findContactByEmail = async (
 
 // Nueva función para guardar el contacto
 export const saveContact = async (
-  contactData: any
+  userEmail: string,
+  contactId: string
 ): Promise<IResponse<any>> => {
+  const contactData = {
+    contacts: {
+      [contactId]: {
+        isBlocked: false,
+      },
+    },
+  };
+
   try {
-    const response = await axiosInstance.post(`/contacts/save`, contactData); // Endpoint ficticio
+    const response = await axiosInstance.patch(
+      `/users/${userEmail}/contacts`,
+      contactData
+    );
     return {
       ok: true,
       data: response.data,
@@ -101,6 +113,57 @@ export const deleteProfile = async (
     };
   } catch (error: unknown | AxiosError) {
     let errorMessage = "Error al eliminar el perfil";
+
+    if (error instanceof AxiosError) {
+      errorMessage = error.response?.data?.message || errorMessage;
+    }
+
+    return {
+      ok: false,
+      error: errorMessage,
+    };
+  }
+};
+
+export const listContacts = async (
+  userEmail: string
+): Promise<IResponse<any>> => {
+  try {
+    const response = await axiosInstance.get(
+      `/users/${userEmail}/contacts?show=full`
+    );
+    return {
+      ok: true,
+      data: response.data,
+    };
+  } catch (error: unknown | AxiosError) {
+    let errorMessage = "Error al obtener los contactos";
+
+    if (error instanceof AxiosError) {
+      errorMessage = error.response?.data?.message || errorMessage;
+    }
+
+    return {
+      ok: false,
+      error: errorMessage,
+    };
+  }
+};
+
+export const deleteContact = async (
+  userEmail: string,
+  contactId: string
+): Promise<IResponse<any>> => {
+  try {
+    const response = await axiosInstance.delete(
+      `/users/${userEmail}/contacts/${contactId}`
+    );
+    return {
+      ok: true,
+      data: response.data,
+    };
+  } catch (error: unknown | AxiosError) {
+    let errorMessage = "Error al eliminar el contacto";
 
     if (error instanceof AxiosError) {
       errorMessage = error.response?.data?.message || errorMessage;

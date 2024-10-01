@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
-
 import toast from "react-hot-toast";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-
 import { Camera, Plus, X } from "lucide-react";
 import { ScrollArea } from "../ui/scroll-area";
 import { Checkbox } from "../ui/checkbox";
@@ -18,9 +16,10 @@ import {
   Dialog,
 } from "@/components/ui/dialog";
 import { IUser } from "@/interfaces";
-import { useGetUsers } from "@/hooks";
 import { Spinner } from "./Spinner";
 import { uploadImage } from "@/services/cloudinaryService";
+import { listContacts } from "@/services/private"; // Importa la función listContacts
+import { useUserStore } from "@/store"; // Importa el store para obtener el usuario
 
 interface IFormGroup {
   name: string;
@@ -40,7 +39,7 @@ const INITIAL_VALUES = {
   description: "",
   chatRoomType: "public",
   members: [],
-}
+};
 
 const VALID_IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif"];
 
@@ -48,12 +47,11 @@ const NewGroupDialog = () => {
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupImage, setNewGroupImage] = useState<File | null>(null);
   const [selectedGroupMembers, setSelectedGroupMembers] = useState<IUser[]>([]);
+  const [contacts, setContacts] = useState<IUser[]>([]); // Estado para los contactos
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const { users, error, isLoading, getUsers } = useGetUsers();
-
-  useEffect(() => {
-    getUsers();
-  }, []);
+  const { user } = useUserStore(); // Obtén el usuario en sesión
 
   const formik = useFormik<IFormGroup>({
     initialValues: INITIAL_VALUES,
@@ -65,7 +63,7 @@ const NewGroupDialog = () => {
     }),
     onSubmit: async (values) => {
       console.log(values);
-      const body: INewGroupChat = {...values};
+      const body: INewGroupChat = { ...values };
 
       if (selectedGroupMembers.length === 0) {
         toast.error("You must select at least one contact");
@@ -100,9 +98,24 @@ const NewGroupDialog = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchContacts = async () => {
+      if (user?.email) {
+        const response = await listContacts(user.email);
+        if (response.ok) {
+          setContacts(response.data); // Asigna los contactos obtenidos
+        } else {
+          console.error(response.error);
+        }
+      }
+    };
+
+    fetchContacts();
+  }, [user]);
+
   const handleUploadImage = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    
+
     if (file) {
       if (!VALID_IMAGE_TYPES.includes(file.type)) {
         toast.error("Invalid image format. Only allowed JPEG, PNG y GIF.");
@@ -192,7 +205,7 @@ const NewGroupDialog = () => {
                   <p>{error}</p>
                 </div>
               ) : (
-                users.map((contact) => (
+                contacts.map((contact) => (
                   <div
                     key={contact._id}
                     className="flex items-center space-x-2 mb-2"
@@ -202,15 +215,10 @@ const NewGroupDialog = () => {
                       checked={selectedGroupMembers.includes(contact)}
                       onCheckedChange={(checked) => {
                         if (checked) {
-                          setSelectedGroupMembers((prev) => [
-                            ...prev,
-                            contact,
-                          ]);
+                          setSelectedGroupMembers((prev) => [...prev, contact]);
                         } else {
                           setSelectedGroupMembers((prev) =>
-                            prev.filter(
-                              (member) => member !== contact
-                            )
+                            prev.filter((member) => member !== contact)
                           );
                         }
                       }}
