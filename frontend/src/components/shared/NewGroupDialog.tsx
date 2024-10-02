@@ -21,15 +21,12 @@ import { uploadImage } from "@/services/cloudinaryService";
 import { createNewGroupChat, listContacts } from "@/services/private"; // Importa la función listContacts
 import { useUserStore } from "@/store"; // Importa el store para obtener el usuario
 
-const VALID_IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif"];
-
 const NewGroupDialog = () => {
   const [groupImage, setGroupImage] = useState<File | null>(null);
   const [selectedGroupMembers, setSelectedGroupMembers] = useState<IUser[]>([]);
   const [contacts, setContacts] = useState<IUser[]>([]); // Estado para los contactos
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   const { user } = useUserStore();
 
@@ -46,6 +43,7 @@ const NewGroupDialog = () => {
       members: Yup.array().optional(),
     }),
     onSubmit: async (values) => {
+      setIsLoading(true);
       const groupData: any = {};
 
       groupData.name = values.name;
@@ -53,6 +51,7 @@ const NewGroupDialog = () => {
 
       if (selectedGroupMembers.length === 0) {
         toast.error("You must select at least one contact");
+        setIsLoading(false);
         return;
       } else {
         groupData.membersArray = selectedGroupMembers.map((user) => ({
@@ -64,6 +63,7 @@ const NewGroupDialog = () => {
         const validTypes = ["image/jpeg", "image/png", "image/gif"];
         if (!validTypes.includes(groupImage.type)) {
           toast.error("Invalid image format. Only allowed JPEG, PNG y GIF.");
+          setIsLoading(false);
           return;
         }
 
@@ -73,16 +73,19 @@ const NewGroupDialog = () => {
         } catch (error) {
           console.error("Error uploading the group image:", error);
           toast.error("Error uploading the group image");
+          setIsLoading(false);
           return;
         }
       }
 
       const response = await createNewGroupChat(groupData);
       if (response.ok) {
+        setIsLoading(false);
         handleClose();
         toast.success(`${values.name} group chat created successfully!`);
       } else {
         toast.error(response.error || "Error creating the group chat");
+        setIsLoading(false);
       }
     },
   });
@@ -181,10 +184,6 @@ const NewGroupDialog = () => {
               {isLoading ? (
                 <div className="flex items-center justify-center h-full">
                   <Spinner size="size-6" />
-                </div>
-              ) : !isLoading && error ? (
-                <div className="flex items-center justify-center h-full">
-                  <p>{error}</p>
                 </div>
               ) : (
                 contacts.map((contact) => (
