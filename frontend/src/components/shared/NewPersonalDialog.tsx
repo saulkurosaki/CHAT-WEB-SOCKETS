@@ -10,7 +10,11 @@ import { Button } from "../ui/button";
 import { UserPlus } from "lucide-react";
 import { ScrollArea } from "../ui/scroll-area";
 import ContactCard from "./ContactCard"; // Importa el nuevo componente
-import { listContacts, deleteContact } from "@/services/private"; // Importa las funciones
+import {
+  listContacts,
+  deleteContact,
+  createNewPersonalChat,
+} from "@/services/private"; // Importa las funciones
 import { useUserStore } from "@/store";
 import NewContactDialog from "./NewContactDialog";
 import toast from "react-hot-toast";
@@ -18,6 +22,7 @@ import toast from "react-hot-toast";
 const NewPersonalDialog = () => {
   const [contacts, setContacts] = useState([]);
   const { user, setUser } = useUserStore();
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const fetchContacts = async () => {
@@ -46,12 +51,35 @@ const NewPersonalDialog = () => {
     }
   };
 
-  const createPersonalChat = (contact) => {
-    // Lógica para crear un chat personal
+  const createPersonalChat = async (contact: any) => {
+    const { name: contactName, lastname: contactLastname } = contact;
+    const userName = user!.name;
+    const userLastname = user!.lastname;
+
+    const response = await createNewPersonalChat(
+      contact._id, // ID del contacto
+      contactName, // Nombre del contacto
+      contactLastname, // Apellido del contacto
+      userName, // Nombre del usuario
+      userLastname // Apellido del usuario
+    );
+
+    if (response.ok) {
+      handleClose();
+      toast.success(
+        `Welcome to your chat with ${contactName} ${contactLastname}`
+      );
+    } else {
+      toast.error(response.error || "Error creating the ChatRoom :(");
+    }
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className="w-[48%]">
           <UserPlus className="mr-2 h-4 w-4" /> New Personal Chat
