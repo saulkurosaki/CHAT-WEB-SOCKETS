@@ -41,6 +41,9 @@ export class ChatRoom extends Document {
     members: Record<string, RoleName>; // Aquí se almacenan los ids de usuario como claves y los roles como valores.
 
     @Prop()
+    avatar?: string;
+
+    @Prop()
     password?: string;
 
     @Prop({ default: false })

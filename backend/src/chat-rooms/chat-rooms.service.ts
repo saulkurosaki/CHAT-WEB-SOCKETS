@@ -43,48 +43,58 @@ export class ChatRoomsService {
     return null;
   }
 
-  private checkMembers(members: Record<string, RoleName>, userId: string) {
-
-    delete members[userId];
-
-    const membersKeys = Object.keys(members);
-    const membersValues = Object.values(members);
-
-    if (membersKeys.length !== membersValues.length)
-      throw new BadRequestException('Members must have a unique key');
-
-    if (membersKeys.length !== new Set(membersKeys).size)
-      throw new BadRequestException('Members must have a unique key');
-
-    if (membersValues.includes(RoleName.Owner))
-      throw new BadRequestException('"owner" cannot be added as a member');
-
-    const cleanMembers = {
-      ...members,
-      [userId]: RoleName.Owner
-    };
-
+  private checkMembers(members: Record<string, string>, userId: string): Record<string, RoleName> {
+    const cleanMembers: Record<string, RoleName> = {};
+  
+    for (const [key, value] of Object.entries(members)) {
+      if (!isValidObjectId(key)) {
+        throw new BadRequestException(`Invalid member ID: ${key}`);
+      }
+  
+      if (key === userId) {
+        throw new BadRequestException('Creator cannot be added as a member');
+      }
+  
+      const role = value as RoleName;
+      if (!Object.values(RoleName).includes(role)) {
+        throw new BadRequestException(`Invalid role for member ${key}: ${value}`);
+      }
+  
+      if (role === RoleName.Owner) {
+        throw new BadRequestException('"owner" cannot be added as a member');
+      }
+  
+      cleanMembers[key] = role;
+    }
+  
     return cleanMembers;
   }
 
-  async create(createChatRoomDto: CreateChatRoomDto, req: Request) {
-
-    const { id: userId }: User = req['user'];
-
+  async create(createChatRoomDto: CreateChatRoomDto, user: User) {
     const existsChatRoom = await this.findByName(createChatRoomDto.name);
-    if (existsChatRoom) throw new BadRequestException('Chat Room with that name already exists');
-
-    const members = this.checkMembers(createChatRoomDto.members, userId);
-
-    const newChatRoomData = {
-      ...createChatRoomDto,
-      createdBy: userId,
-      members,
+    if (existsChatRoom)
+      throw new BadRequestException('Chat Room already exists');
+  
+    // Inicializamos los miembros con el creador como 'owner'
+    let members: Record<string, RoleName> = {
+      [user._id.toString()]: RoleName.Owner
     };
-
-    const createdChatRoom = new this.chatRoomModel(newChatRoomData);
+  
+    // Si se proporcionan miembros adicionales, los validamos y añadimos
+    if (createChatRoomDto.members && Object.keys(createChatRoomDto.members).length > 0) {
+      const validatedMembers = this.checkMembers(createChatRoomDto.members, user._id.toString());
+      members = { ...members, ...validatedMembers };
+    }
+  
+    // Crear el chat room
+    const createdChatRoom = new this.chatRoomModel({
+      ...createChatRoomDto,
+      createdBy: user._id,
+      members: members,
+      avatar: createChatRoomDto.avatar || null,
+    });
+  
     await createdChatRoom.save();
-
     return createdChatRoom;
   }
 

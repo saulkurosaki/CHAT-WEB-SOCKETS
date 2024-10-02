@@ -20,8 +20,12 @@ export class ChatRoomsController {
 
   @Post()
   @Auth()
-  async createChatRoom(@Body() createChatRoomDto: CreateChatRoomDto, @Req() req: Request) {
-    return this.chatRoomsService.create(createChatRoomDto, req);
+  async createChatRoom(
+    @Body() createChatRoomDto: CreateChatRoomDto,
+    @Req() request: any,
+  ) {
+    const user = request.user;
+    return this.chatRoomsService.create(createChatRoomDto, user);
   }
 
   @Get()
