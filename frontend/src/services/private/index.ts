@@ -175,3 +175,39 @@ export const deleteContact = async (
     };
   }
 };
+
+export const createNewPersonalChat = async (
+  contactId: string,
+  contactName: string,
+  contactLastname: string,
+  userName: string,
+  userLastname: string
+): Promise<IResponse<any>> => {
+  const chatRoomData = {
+    name: `${userName} ${userLastname} & ${contactName} ${contactLastname} ChatRoom`,
+    description: `${userName} ${userLastname} & ${contactName} ${contactLastname} ChatRoom`,
+    chatRoomType: "private",
+    members: {
+      [contactId]: "admin",
+    },
+  };
+
+  try {
+    const response = await axiosInstance.post("/chat-rooms", chatRoomData);
+    return {
+      ok: true,
+      data: response.data,
+    };
+  } catch (error: unknown | AxiosError) {
+    let errorMessage = "Error al crear el chat personal";
+
+    if (error instanceof AxiosError) {
+      errorMessage = error.response?.data?.message || errorMessage;
+    }
+
+    return {
+      ok: false,
+      error: errorMessage,
+    };
+  }
+};
