@@ -178,11 +178,7 @@ export class UsersService {
       [`members.${userId}`]: { $exists: true }
     });
   
-    console.log(`Chatrooms encontrados: ${chatRooms.length}`);
   
-    // Extraemos solo los IDs de los chatrooms
-    const chatRoomIds = chatRooms.map(room => room._id.toString());
-  
-    return { [userId]: chatRoomIds };
+    return { [userId]: chatRooms };
   }
 }

@@ -1,25 +1,31 @@
 import { ChatRoomType } from "../entities/chat-room.entity";
-import { IsOptional, IsString, MinLength, IsEnum, IsMongoId, IsDefined, IsObject, isMongoId, registerDecorator, ValidationArguments, ValidationOptions } from "class-validator";
+import { IsOptional, IsString, MinLength, IsEnum, IsMongoId, IsDefined, IsObject, isMongoId, registerDecorator, ValidationArguments, ValidationOptions, IsUrl, IsLowercase } from "class-validator";
 import { RoleName } from "src/roles/entities/role.entity";
 
 export class CreateChatRoomDto {
     @IsString()
     @MinLength(2)
     name: string;
-
+    
     @IsString()
     @MinLength(6)
     @IsOptional()
     description?: string;
-
+    
     @IsString()
     @IsEnum(ChatRoomType)
     chatRoomType: ChatRoomType;
-
-    @IsObject()
+    
     @IsValidKeyObjectId() // Validamos que las claves sean ObjectIds
     @IsValidValueRolename() // Validamos que las values sean RoleName
-    members: Record<string, RoleName>;  // Clave: userId, Valor: role
+    @IsObject()
+    @IsOptional()
+    members?: Record<string, RoleName>;  // Clave: userId, Valor: role
+    
+    @IsLowercase()
+    @IsOptional()
+    @IsUrl()
+    avatar?: string;
 
     @IsString()
     @MinLength(4)
