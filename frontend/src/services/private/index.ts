@@ -212,11 +212,17 @@ export const createNewPersonalChat = async (
   }
 };
 
-export const createNewGroupChat = async (
-  name: string,
-  description: string,
-  membersArray: { [key: string]: string }[]
-): Promise<IResponse<any>> => {
+export const createNewGroupChat = async ({
+  name,
+  description,
+  membersArray,
+  avatar,
+}: {
+  name: string;
+  description: string;
+  membersArray: { [key: string]: string }[];
+  avatar: string | null;
+}): Promise<IResponse<any>> => {
   const members = membersArray.reduce((acc, member) => {
     acc[member._id] = "user";
     return acc;
@@ -227,6 +233,7 @@ export const createNewGroupChat = async (
     description,
     chatRoomType: "public",
     members,
+    avatar,
   };
 
   try {
