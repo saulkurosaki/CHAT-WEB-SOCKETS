@@ -18,7 +18,7 @@ import {
 import { IUser } from "@/interfaces";
 import { Spinner } from "./Spinner";
 import { uploadImage } from "@/services/cloudinaryService";
-import { listContacts } from "@/services/private"; // Importa la función listContacts
+import { createNewGroupChat, listContacts } from "@/services/private"; // Importa la función listContacts
 import { useUserStore } from "@/store"; // Importa el store para obtener el usuario
 
 interface IFormGroup {
@@ -28,9 +28,6 @@ interface IFormGroup {
   members: {
     [key: string]: string;
   }[];
-}
-
-interface INewGroupChat extends IFormGroup {
   image?: string | null;
 }
 
@@ -44,14 +41,14 @@ const INITIAL_VALUES = {
 const VALID_IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif"];
 
 const NewGroupDialog = () => {
-  const [newGroupName, setNewGroupName] = useState("");
   const [newGroupImage, setNewGroupImage] = useState<File | null>(null);
   const [selectedGroupMembers, setSelectedGroupMembers] = useState<IUser[]>([]);
   const [contacts, setContacts] = useState<IUser[]>([]); // Estado para los contactos
+  const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const { user } = useUserStore(); // Obtén el usuario en sesión
+  const { user } = useUserStore();
 
   const formik = useFormik<IFormGroup>({
     initialValues: INITIAL_VALUES,
@@ -62,8 +59,7 @@ const NewGroupDialog = () => {
       members: Yup.array().optional(),
     }),
     onSubmit: async (values) => {
-      console.log(values);
-      const body: INewGroupChat = { ...values };
+      const body: IFormGroup = { ...values };
 
       if (selectedGroupMembers.length === 0) {
         toast.error("You must select at least one contact");
@@ -84,19 +80,19 @@ const NewGroupDialog = () => {
         }
       }
 
-      // Crear el grupo
-      console.log(body);
+      const response = await createNewGroupChat(
+        body.name,
+        body.description,
+        body.members
+      );
+      if (response.ok) {
+        handleClose();
+        toast.success(`${body.name} group chat created successfully!`);
+      } else {
+        toast.error(response.error || "Error creating the group chat");
+      }
     },
   });
-
-  const createGroupChat = () => {
-    if (newGroupName && selectedGroupMembers.length > 0) {
-      // Lógica para crear el grupo
-      setNewGroupName("");
-      setNewGroupImage(null);
-      setSelectedGroupMembers([]);
-    }
-  };
 
   useEffect(() => {
     const fetchContacts = async () => {
@@ -126,8 +122,12 @@ const NewGroupDialog = () => {
     }
   };
 
+  const handleClose = () => {
+    setIsOpen(false);
+  };
+
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className="w-[48%]">
           <Plus className="mr-2 h-4 w-4" /> New Group Chat
@@ -137,7 +137,7 @@ const NewGroupDialog = () => {
         <DialogHeader>
           <DialogTitle>Create New Group Chat</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
+        <form onSubmit={formik.handleSubmit} className="space-y-4">
           <Input
             type="name"
             name="name"
@@ -232,10 +232,10 @@ const NewGroupDialog = () => {
             </ScrollArea>
           </div>
 
-          <Button onClick={createGroupChat} className="w-full">
+          <Button type="submit" className="w-full">
             Create Group
           </Button>
-        </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

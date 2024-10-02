@@ -39,7 +39,7 @@ const NewPersonalDialog = () => {
     fetchContacts();
   }, [user]);
 
-  const handleDeleteContact = async (contactId) => {
+  const handleDeleteContact = async (contactId: any) => {
     if (user?.email) {
       const response = await deleteContact(user.email, contactId);
       if (response.ok) {
