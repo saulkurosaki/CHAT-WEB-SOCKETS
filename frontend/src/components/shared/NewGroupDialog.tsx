@@ -21,27 +21,10 @@ import { uploadImage } from "@/services/cloudinaryService";
 import { createNewGroupChat, listContacts } from "@/services/private"; // Importa la función listContacts
 import { useUserStore } from "@/store"; // Importa el store para obtener el usuario
 
-interface IFormGroup {
-  name: string;
-  description: string;
-  chatRoomType: string;
-  members: {
-    [key: string]: string;
-  }[];
-  image?: string | null;
-}
-
-const INITIAL_VALUES = {
-  name: "",
-  description: "",
-  chatRoomType: "public",
-  members: [],
-};
-
 const VALID_IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif"];
 
 const NewGroupDialog = () => {
-  const [newGroupImage, setNewGroupImage] = useState<File | null>(null);
+  const [groupImage, setGroupImage] = useState<File | null>(null);
   const [selectedGroupMembers, setSelectedGroupMembers] = useState<IUser[]>([]);
   const [contacts, setContacts] = useState<IUser[]>([]); // Estado para los contactos
   const [isOpen, setIsOpen] = useState(false);
@@ -50,44 +33,54 @@ const NewGroupDialog = () => {
 
   const { user } = useUserStore();
 
-  const formik = useFormik<IFormGroup>({
-    initialValues: INITIAL_VALUES,
+  const formik = useFormik({
+    initialValues: {
+      name: "",
+      description: "",
+      image: null,
+    },
+    enableReinitialize: true,
     validationSchema: Yup.object({
       name: Yup.string().required("Group name is required"),
       description: Yup.string().required("Group description is required"),
-      chatRoomType: Yup.string().required("Group type is required"),
       members: Yup.array().optional(),
     }),
     onSubmit: async (values) => {
-      const body: IFormGroup = { ...values };
+      const groupData: any = {};
+
+      groupData.name = values.name;
+      groupData.description = values.description;
 
       if (selectedGroupMembers.length === 0) {
         toast.error("You must select at least one contact");
         return;
       } else {
-        body.members = selectedGroupMembers.map((user) => ({
+        groupData.membersArray = selectedGroupMembers.map((user) => ({
           _id: user._id,
         }));
       }
 
-      if (newGroupImage) {
+      if (groupImage) {
+        const validTypes = ["image/jpeg", "image/png", "image/gif"];
+        if (!validTypes.includes(groupImage.type)) {
+          toast.error("Invalid image format. Only allowed JPEG, PNG y GIF.");
+          return;
+        }
+
         try {
-          const avatarUrl = await uploadImage(newGroupImage);
-          body.image = avatarUrl;
+          const groupImageUrl = await uploadImage(groupImage);
+          groupData.avatar = groupImageUrl; // Agregar la URL de la imagen al objeto de datos
         } catch (error) {
-          toast.error("Error uploading the profile image");
+          console.error("Error uploading the group image:", error);
+          toast.error("Error uploading the group image");
           return;
         }
       }
 
-      const response = await createNewGroupChat(
-        body.name,
-        body.description,
-        body.members
-      );
+      const response = await createNewGroupChat(groupData);
       if (response.ok) {
         handleClose();
-        toast.success(`${body.name} group chat created successfully!`);
+        toast.success(`${values.name} group chat created successfully!`);
       } else {
         toast.error(response.error || "Error creating the group chat");
       }
@@ -108,19 +101,6 @@ const NewGroupDialog = () => {
 
     fetchContacts();
   }, [user]);
-
-  const handleUploadImage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-
-    if (file) {
-      if (!VALID_IMAGE_TYPES.includes(file.type)) {
-        toast.error("Invalid image format. Only allowed JPEG, PNG y GIF.");
-        return;
-      }
-
-      setNewGroupImage(file);
-    }
-  };
 
   const handleClose = () => {
     setIsOpen(false);
@@ -162,30 +142,32 @@ const NewGroupDialog = () => {
 
           <div>
             <Label
-              htmlFor="new-group-image"
+              htmlFor="group-image"
               className="cursor-pointer flex items-center justify-center p-2 border border-dashed border-gray-300 rounded-md"
             >
               <Camera className="mr-2 h-4 w-4" />
               <span>Upload Group Image (Optional)</span>
               <Input
-                id="new-group-image"
+                id="group-image"
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={handleUploadImage}
+                onChange={(e) =>
+                  e.target.files && setGroupImage(e.target.files[0])
+                }
               />
             </Label>
-            {newGroupImage && (
+            {groupImage && (
               <div className="mt-2 relative">
                 <img
-                  src={URL.createObjectURL(newGroupImage)}
+                  src={URL.createObjectURL(groupImage)}
                   alt="Group preview"
                   className="w-full h-32 object-cover rounded-md"
                 />
                 <Button
                   variant="ghost"
                   className="absolute top-0 right-0"
-                  onClick={() => setNewGroupImage(null)}
+                  onClick={() => setGroupImage(null)}
                 >
                   <X className="h-4 w-4" />
                 </Button>
