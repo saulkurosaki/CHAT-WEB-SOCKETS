@@ -211,3 +211,47 @@ export const createNewPersonalChat = async (
     };
   }
 };
+
+export const createNewGroupChat = async ({
+  name,
+  description,
+  membersArray,
+  avatar,
+}: {
+  name: string;
+  description: string;
+  membersArray: { [key: string]: string }[];
+  avatar: string | null;
+}): Promise<IResponse<any>> => {
+  const members = membersArray.reduce((acc, member) => {
+    acc[member._id] = "user";
+    return acc;
+  }, {});
+
+  const chatRoomData = {
+    name,
+    description,
+    chatRoomType: "public",
+    members,
+    avatar,
+  };
+
+  try {
+    const response = await axiosInstance.post("/chat-rooms", chatRoomData);
+    return {
+      ok: true,
+      data: response.data,
+    };
+  } catch (error: unknown | AxiosError) {
+    let errorMessage = "Error al crear el grupo de chat";
+
+    if (error instanceof AxiosError) {
+      errorMessage = error.response?.data?.message || errorMessage;
+    }
+
+    return {
+      ok: false,
+      error: errorMessage,
+    };
+  }
+};
