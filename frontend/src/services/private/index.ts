@@ -255,3 +255,49 @@ export const createNewGroupChat = async ({
     };
   }
 };
+
+export const getUserChatRooms = async (
+  userId: string
+): Promise<IResponse<any>> => {
+  try {
+    const response = await axiosInstance.get(`/users/${userId}/chat-rooms`);
+    return {
+      ok: true,
+      data: response.data,
+    };
+  } catch (error: unknown | AxiosError) {
+    let errorMessage = "Error al obtener las salas de chat del usuario";
+
+    if (error instanceof AxiosError) {
+      errorMessage = error.response?.data?.message || errorMessage;
+    }
+
+    return {
+      ok: false,
+      error: errorMessage,
+    };
+  }
+};
+
+// export const findUserById = async (id: string): Promise<IResponse<any>> => {
+//   try {
+//     const response = await axiosInstance.get(`/users/${id}`);
+//     return {
+//       ok: true,
+//       data: response.data,
+//     };
+//   } catch (error: unknown | AxiosError) {
+//     let errorMessage = "Algo salió mal, intenta de nuevo";
+
+//     if (error instanceof AxiosError) {
+//       if (error.response?.status === 404) {
+//         errorMessage = "Usuario no encontrado";
+//       }
+//     }
+
+//     return {
+//       ok: false,
+//       error: errorMessage,
+//     };
+//   }
+// };
