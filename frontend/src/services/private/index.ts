@@ -279,25 +279,25 @@ export const getUserChatRooms = async (
   }
 };
 
-// export const findUserById = async (id: string): Promise<IResponse<any>> => {
-//   try {
-//     const response = await axiosInstance.get(`/users/${id}`);
-//     return {
-//       ok: true,
-//       data: response.data,
-//     };
-//   } catch (error: unknown | AxiosError) {
-//     let errorMessage = "Algo salió mal, intenta de nuevo";
+export const findUserById = async (id: string): Promise<IResponse<any>> => {
+  try {
+    const response = await axiosInstance.get(`/users/${id}`);
+    return {
+      ok: true,
+      data: response.data,
+    };
+  } catch (error: unknown | AxiosError) {
+    let errorMessage = "Algo salió mal, intenta de nuevo";
 
-//     if (error instanceof AxiosError) {
-//       if (error.response?.status === 404) {
-//         errorMessage = "Usuario no encontrado";
-//       }
-//     }
+    if (error instanceof AxiosError) {
+      if (error.response?.status === 404) {
+        errorMessage = "Usuario no encontrado";
+      }
+    }
 
-//     return {
-//       ok: false,
-//       error: errorMessage,
-//     };
-//   }
-// };
+    return {
+      ok: false,
+      error: errorMessage,
+    };
+  }
+};
