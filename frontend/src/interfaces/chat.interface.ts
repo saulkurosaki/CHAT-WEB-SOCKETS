@@ -1,7 +1,8 @@
 export interface IChat {
   _id: string;
   name: string;
-  type: string;
+  chatRoomType: string;
+  avatar?: string | null;
   image?: string | null;
   members: string[];
   unreadMessages: number;
