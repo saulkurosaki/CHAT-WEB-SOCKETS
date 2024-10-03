@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 
 import { useNavigate } from "react-router-dom";
 
-import { useSearchStore } from "@/store";
+import { useSearchStore, useUserStore } from "@/store";
 
-import { generateChats, handleGetInitials } from "@/helpers";
+import { handleGetInitials } from "@/helpers";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -12,19 +12,68 @@ import { Badge } from "@/components/ui/badge";
 
 import { IChat } from "@/interfaces";
 import Footer from "@/components/shared/Footer";
+import { findUserById, getUserChatRooms } from "@/services/private";
 
 export const ChatRooms = () => {
+  const { search } = useSearchStore();
+  const [chats, setChats] = useState<IChat[]>([]);
+  const { user } = useUserStore();
+
   const navigate = useNavigate();
 
-  const { search } = useSearchStore();
+  useEffect(() => {
+    const fetchChatRooms = async () => {
+      if (user?._id) {
+        const response = await getUserChatRooms(user._id);
+        if (response.ok) {
+          const chatRooms = response.data[user._id];
+          if (chatRooms && chatRooms.length > 0) {
+            setChats(chatRooms);
+          }
+        } else {
+          console.error(response.error);
+        }
+      }
+    };
 
-  const [chats, setChats] = useState<IChat[]>([]);
+    fetchChatRooms();
+  }, [user]);
 
   useEffect(() => {
-    const generatedChats = generateChats(20);
+    const updatePrivateRoomsAvatarAndName = async () => {
+      const updatedChats = await Promise.all(
+        chats.map(async (chat) => {
+          if (chat.chatRoomType === "private") {
+            const memberIds = Object.keys(chat.members);
+            let avatarFound = false; // Variable para verificar si se encontró un avatar
 
-    setChats(generatedChats);
-  }, []);
+            for (const memberId of memberIds) {
+              if (memberId !== user?._id) {
+                const response = await findUserById(memberId);
+                if (response.ok) {
+                  chat.avatar = response.data.avatar; // Asigna el avatar directamente al chat
+                  chat.name = `${response.data.name} ${response.data.lastname}`; // Asigna el nombre y apellido
+                  avatarFound = true; // Marcamos que se encontró un avatar
+                  break; // Salimos del bucle una vez que encontramos un avatar
+                }
+              }
+            }
+
+            if (!avatarFound) {
+              chat.avatar = null;
+            }
+          }
+          return chat; // Retornar el chat con el avatar y nombre actualizados
+        })
+      );
+
+      setChats(updatedChats);
+    };
+
+    if (chats.length > 0) {
+      updatePrivateRoomsAvatarAndName();
+    }
+  }, [chats.length, user]);
 
   const filteredChats = chats.filter((chat) =>
     chat.name.toLowerCase().includes(search.toLowerCase())
@@ -44,8 +93,8 @@ export const ChatRooms = () => {
               onClick={() => navigate(`/chat/${chat._id}`)}
             >
               <Avatar className="h-12 w-12 mr-4">
-                {chat.image ? (
-                  <AvatarImage src={chat.image} alt={chat.name} />
+                {chat.avatar ? (
+                  <AvatarImage src={chat.avatar} alt={chat.name} />
                 ) : (
                   <AvatarFallback>
                     {handleGetInitials(chat.name)}
@@ -55,7 +104,9 @@ export const ChatRooms = () => {
               <div className="flex-grow">
                 <h2 className="font-semibold">{chat.name}</h2>
                 <p className="text-sm text-gray-500">
-                  {chat.type === "group" ? "Group Chat" : "Personal Chat"}
+                  {chat.chatRoomType === "public"
+                    ? "Group Chat"
+                    : "Personal Chat"}
                 </p>
               </div>
               {chat.unreadMessages > 0 && (
