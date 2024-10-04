@@ -1,10 +1,5 @@
-export const handleGetInitials = (name?: string) => {
-  if (!name) return "J";
-
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .slice(0, 3)
-    .join("")
-    .toUpperCase();
+export const handleGetInitials = (name) => {
+  if (!name) return ""; // Asegúrate de manejar el caso donde el nombre es undefined o vacío
+  const names = name.split(" ");
+  return names.map((n) => n.charAt(0).toUpperCase()).join("");
 };

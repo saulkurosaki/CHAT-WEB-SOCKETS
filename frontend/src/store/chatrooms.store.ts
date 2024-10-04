@@ -4,13 +4,16 @@ import { IChat } from "@/interfaces";
 
 interface ChatRoomsState {
   chats: IChat[];
+  currentRoom: IChat | null; // Agregar el estado currentRoom
   loading: boolean;
   fetchChatRooms: (userId: string) => Promise<void>;
   updatePrivateRoomsAvatarAndName: (userId: string) => Promise<void>;
+  setCurrentRoom: (chatRoomId: string) => void; // Función para establecer el currentRoom
 }
 
 export const useChatRoomsStore = create<ChatRoomsState>((set, get) => ({
   chats: [],
+  currentRoom: null, // Inicializar currentRoom
   loading: false,
   fetchChatRooms: async (userId) => {
     set({ loading: true });
@@ -52,5 +55,9 @@ export const useChatRoomsStore = create<ChatRoomsState>((set, get) => ({
 
     set({ chats: updatedChats });
     set({ loading: false });
+  },
+  setCurrentRoom: (chatRoomId) => {
+    const chatRoom = get().chats.find((chat) => chat._id === chatRoomId);
+    set({ currentRoom: chatRoom || null }); // Establecer el currentRoom
   },
 }));
