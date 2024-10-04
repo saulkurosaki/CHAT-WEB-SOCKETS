@@ -4,9 +4,10 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Send } from "lucide-react";
+import { getChatRoomDetails } from "@/services/private"; // Importa la función
 
 const ChatRoom = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // Obtiene el chatRoomId de los parámetros de la URL
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [user, setUser] = useState(null);
@@ -15,27 +16,21 @@ const ChatRoom = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchRoom = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:3000/api/v1/chat-rooms/Tech Discussion Room 7`
-        );
-        if (!response.ok) {
-          throw new Error("Error al obtener la sala de chat");
-        }
-        const room = await response.json();
-        setCurrentRoom(room);
-        setMessages(room.messages || []);
-      } catch (err) {
-        console.error(err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
+    const fetchChatRoomDetails = async () => {
+      setLoading(true); // Inicia el loader
+      const response = await getChatRoomDetails(id!); // Llama a la función para obtener los detalles de la sala de chat
+      console.log(response.data);
+      if (response.ok) {
+        setCurrentRoom(response.data); // Asigna los detalles de la sala de chat
+        setMessages(response.data.messages || []); // Asigna los mensajes de la sala de chat
+      } else {
+        setError(response.error); // Maneja el error
       }
+      setLoading(false); // Finaliza el loader
     };
 
-    fetchRoom();
-  }, [id]);
+    fetchChatRoomDetails();
+  }, [id]); // Dependencia en el id
 
   const sendMessage = () => {};
 

@@ -1,85 +1,32 @@
-import { useState, useEffect } from "react";
-
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { useSearchStore, useUserStore } from "@/store";
-
+import { useChatRoomsStore } from "@/store/chatrooms.store"; // Importa el store
 import { handleGetInitials } from "@/helpers";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-
-import { IChat } from "@/interfaces";
 import Footer from "@/components/shared/Footer";
-import { findUserById, getUserChatRooms } from "@/services/private";
 
 import "ldrs/waveform";
 
 export const ChatRooms = () => {
   const { search } = useSearchStore();
-  const [chats, setChats] = useState<IChat[]>([]);
   const { user } = useUserStore();
-  const [loading, setLoading] = useState(true); // Estado para el loader
+  const { chats, loading, fetchChatRooms, updatePrivateRoomsAvatarAndName } =
+    useChatRoomsStore();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchChatRooms = async () => {
-      setLoading(true);
+    const loadChatRooms = async () => {
       if (user?._id) {
-        const response = await getUserChatRooms(user._id);
-        if (response.ok) {
-          const chatRooms = response.data[user._id];
-          if (chatRooms && chatRooms.length > 0) {
-            setChats(chatRooms);
-          }
-        } else {
-          console.error(response.error);
-          setLoading(false);
-        }
+        await fetchChatRooms(user._id); // Llama a la función del store
+        await updatePrivateRoomsAvatarAndName(user._id); // Llama a la función del store
       }
     };
 
-    fetchChatRooms();
-  }, [user]);
-
-  useEffect(() => {
-    const updatePrivateRoomsAvatarAndName = async () => {
-      setLoading(true);
-      const updatedChats = await Promise.all(
-        chats.map(async (chat) => {
-          if (chat.chatRoomType === "private") {
-            const memberIds = Object.keys(chat.members);
-            let avatarFound = false; // Variable para verificar si se encontró un avatar
-
-            for (const memberId of memberIds) {
-              if (memberId !== user?._id) {
-                const response = await findUserById(memberId);
-                if (response.ok) {
-                  chat.avatar = response.data.avatar; // Asigna el avatar directamente al chat
-                  chat.name = `${response.data.name} ${response.data.lastname}`; // Asigna el nombre y apellido
-                  avatarFound = true; // Marcamos que se encontró un avatar
-                  break; // Salimos del bucle una vez que encontramos un avatar
-                }
-              }
-            }
-
-            if (!avatarFound) {
-              chat.avatar = null;
-            }
-          }
-          return chat; // Retornar el chat con el avatar y nombre actualizados
-        })
-      );
-
-      setChats(updatedChats);
-      setLoading(false); // Ocultar el loader una vez que se complete la actualización
-    };
-
-    if (chats.length > 0) {
-      updatePrivateRoomsAvatarAndName();
-    }
-  }, [chats.length, user]);
+    loadChatRooms();
+  }, [user, fetchChatRooms, updatePrivateRoomsAvatarAndName]);
 
   const filteredChats = chats.filter((chat) =>
     chat.name.toLowerCase().includes(search.toLowerCase())
@@ -87,7 +34,7 @@ export const ChatRooms = () => {
 
   return (
     <>
-      {loading ? ( // Mostrar loader si está cargando
+      {loading ? (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50 z-50">
           <l-waveform size={128} speed={1} stroke={8} color="#40EB97" />
         </div>
