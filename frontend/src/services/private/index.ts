@@ -301,3 +301,26 @@ export const findUserById = async (id: string): Promise<IResponse<any>> => {
     };
   }
 };
+
+export const getChatRoomDetails = async (
+  chatRoomId: string
+): Promise<IResponse<any>> => {
+  try {
+    const response = await axiosInstance.get(`/chat-rooms/${chatRoomId}`);
+    return {
+      ok: true,
+      data: response.data,
+    };
+  } catch (error: unknown | AxiosError) {
+    let errorMessage = "Error al obtener los detalles de la sala de chat";
+
+    if (error instanceof AxiosError) {
+      errorMessage = error.response?.data?.message || errorMessage;
+    }
+
+    return {
+      ok: false,
+      error: errorMessage,
+    };
+  }
+};
