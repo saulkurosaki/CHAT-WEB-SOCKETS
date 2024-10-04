@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { useSearchStore, useUserStore } from "@/store";
+import { useChatRoomsStore } from "@/store/chatrooms.store"; // Importa el store
 
 import { handleGetInitials } from "@/helpers";
 
@@ -26,9 +27,9 @@ import ChatInfoDialog from "./ChatInfoDialog";
 export const Header = () => {
   const navigate = useNavigate();
   const inChatRoom = useMatch("/chat/:id");
-
   const { user, setUser } = useUserStore();
   const { search, setSearch } = useSearchStore();
+  const { currentRoom } = useChatRoomsStore(); // Obtiene currentRoom del store
 
   const [showSearch, setShowSearch] = useState(false);
   const [showChatInfo, setShowChatInfo] = useState(false);
@@ -60,7 +61,7 @@ export const Header = () => {
 
         <button onClick={() => navigate("/")}>
           <h1 className="text-2xl font-bold">
-            {inChatRoom ? `${user?.name}` : "Chats"}
+            {inChatRoom ? (currentRoom ? currentRoom.name : "Chat") : "Chats"}
           </h1>
         </button>
       </div>
@@ -97,10 +98,16 @@ export const Header = () => {
         )}
 
         <Avatar className="h-8 w-8">
-          {user?.avatar ? (
-            <AvatarImage src={user?.avatar} alt={user.name} />
+          {inChatRoom && currentRoom ? (
+            currentRoom.avatar ? (
+              <AvatarImage src={currentRoom.avatar} alt={currentRoom.name} />
+            ) : (
+              <AvatarImage src="/default-avatar.webp" alt="Default Avatar" />
+            )
+          ) : user?.avatar ? (
+            <AvatarImage src={user.avatar} alt={user.name} />
           ) : (
-            <AvatarFallback>{handleGetInitials(user?.name)}</AvatarFallback>
+            <AvatarImage src="/default-avatar.webp" alt="Default Avatar" />
           )}
         </Avatar>
 

@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSearchStore, useUserStore } from "@/store";
 import { useChatRoomsStore } from "@/store/chatrooms.store"; // Importa el store
-import { handleGetInitials } from "@/helpers";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
@@ -55,9 +54,10 @@ export const ChatRooms = () => {
                     {chat.avatar ? (
                       <AvatarImage src={chat.avatar} alt={chat.name} />
                     ) : (
-                      <AvatarFallback>
-                        {handleGetInitials(chat.name)}
-                      </AvatarFallback>
+                      <AvatarImage
+                        src="/default-avatar.webp"
+                        alt="Default Avatar"
+                      />
                     )}
                   </Avatar>
                   <div className="flex-grow">
