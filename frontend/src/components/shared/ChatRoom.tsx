@@ -4,33 +4,32 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Send } from "lucide-react";
-import { getChatRoomDetails } from "@/services/private"; // Importa la función
+import { useChatRoomsStore } from "@/store/chatrooms.store"; // Importa el store
 
 const ChatRoom = () => {
   const { id } = useParams(); // Obtiene el chatRoomId de los parámetros de la URL
+  const { currentRoom, setCurrentRoom, chats } = useChatRoomsStore(); // Obtiene currentRoom y setCurrentRoom del store
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
-  const [user, setUser] = useState(null);
-  const [currentRoom, setCurrentRoom] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchChatRoomDetails = async () => {
-      setLoading(true); // Inicia el loader
-      const response = await getChatRoomDetails(id!); // Llama a la función para obtener los detalles de la sala de chat
-      console.log(response.data);
-      if (response.ok) {
-        setCurrentRoom(response.data); // Asigna los detalles de la sala de chat
-        setMessages(response.data.messages || []); // Asigna los mensajes de la sala de chat
-      } else {
-        setError(response.error); // Maneja el error
-      }
-      setLoading(false); // Finaliza el loader
+    const loadCurrentRoom = () => {
+      setCurrentRoom(id!); // Establece el currentRoom basado en el id
     };
 
-    fetchChatRoomDetails();
-  }, [id]); // Dependencia en el id
+    loadCurrentRoom();
+  }, [id, setCurrentRoom]);
+
+  useEffect(() => {
+    if (currentRoom) {
+      setMessages(currentRoom.messages || []); // Asigna los mensajes del currentRoom
+      setLoading(false); // Finaliza el loader
+    } else {
+      setLoading(true); // Si no hay currentRoom, mantén el loader
+    }
+  }, [currentRoom]);
 
   const sendMessage = () => {};
 
@@ -56,12 +55,12 @@ const ChatRoom = () => {
           <div
             key={index}
             className={`flex mb-4 ${
-              msg.sender === user?.name ? "justify-end" : "justify-start"
+              msg.sender === currentRoom.name ? "justify-end" : "justify-start"
             }`}
           >
             <div
               className={`rounded-lg p-2 max-w-xs ${
-                msg.sender === user?.name
+                msg.sender === currentRoom.name
                   ? "bg-teal-500 text-white"
                   : "bg-white"
               }`}
