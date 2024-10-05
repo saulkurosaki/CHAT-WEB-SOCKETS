@@ -51,7 +51,7 @@ export class ChatRoomsController {
   @Delete(':term')
   @Auth()
   remove(@Param('term') term: string, @Req() req: Request) {
-    return this.chatRoomsService.remove(term, req);
+    return this.chatRoomsService.remove(term, req['user']);
   }
 
   @Patch('/:term/members')

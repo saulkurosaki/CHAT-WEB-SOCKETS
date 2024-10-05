@@ -143,9 +143,23 @@ export class ChatRoomsService {
     return chatRoomUpdated;
   }
 
-  async remove(term: string, req: Request) {
-    return this.update(term, { isDeleted: true }, req);
-  }
+  async remove(term: string, user: User) {
+    // Buscar la sala por ID o nombre
+    const chatRoom = await this.findOne(term);
+    if (!chatRoom) throw new BadRequestException('Chat Room not found');
+
+    // Verificamos si el usuario es el creador del chat room
+    if (chatRoom.createdBy.toString() !== user._id.toString()) {
+      throw new BadRequestException(
+        'Only the creator can delete the chat room',
+      );
+    }
+      // Marcamos la sala como eliminada
+      chatRoom.isDeleted = true;
+      await chatRoom.save(); // Guardamos los cambios
+  
+      return `Chat room ${term} has been successfully deleted`;
+    }
 
   async addMembers(term: string, updateChatRoomDto: UpdateChatRoomDto, req: Request) {
 
