@@ -11,12 +11,16 @@ import { Button } from "../ui/button";
 import { ScrollArea } from "../ui/scroll-area";
 import { useState, useEffect } from "react";
 import { useUserStore } from "@/store"; // Asegúrate de importar el store para obtener el usuario
-import { findUserById, listContacts } from "@/services/private"; // Asegúrate de importar las funciones necesarias
+import { findUserById, deleteChatRoom } from "@/services/private"; // Asegúrate de importar las funciones necesarias
+import { useParams, useNavigate } from "react-router-dom"; // Importar useParams y useNavigate
+import toast from "react-hot-toast";
 
 const ChatInfoDialog = ({ currentRoom }: { currentRoom: any }) => {
+  const { user } = useUserStore();
+  const { id: chatRoomId } = useParams(); // Obtener el chatRoomId de los parámetros de la URL
+  const navigate = useNavigate(); // Inicializar useNavigate
   const [currentUser, setCurrentUser] = useState<any>(null); // Estado para almacenar la información del usuario
   const [membersInfo, setMembersInfo] = useState<any[]>([]); // Estado para almacenar la información de los miembros
-  const { user } = useUserStore();
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
@@ -35,6 +39,7 @@ const ChatInfoDialog = ({ currentRoom }: { currentRoom: any }) => {
       }
     };
 
+    console.log(chatRoomId);
     fetchCurrentUser();
   }, [currentRoom, user]);
 
@@ -54,6 +59,21 @@ const ChatInfoDialog = ({ currentRoom }: { currentRoom: any }) => {
 
     fetchMembersInfo();
   }, [currentRoom]);
+
+  const handleDeleteChat = async () => {
+    if (chatRoomId) {
+      const response = await deleteChatRoom(chatRoomId);
+      if (response.ok) {
+        navigate("/");
+        setTimeout(() => {
+          toast.success("ChatRoom deleted successfully");
+        }, 100);
+      } else {
+        toast.error("Error deleting ChatRoom");
+        console.error("Error deleting chat room:", response.error);
+      }
+    }
+  };
 
   return (
     <Dialog>
@@ -139,9 +159,7 @@ const ChatInfoDialog = ({ currentRoom }: { currentRoom: any }) => {
           )}
           <Button
             variant="destructive"
-            onClick={() => {
-              /* Lógica para eliminar el chat */
-            }}
+            onClick={handleDeleteChat}
             className="w-full"
           >
             <Trash2 className="mr-2 h-4 w-4" />
