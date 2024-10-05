@@ -11,28 +11,12 @@ import { Button } from "../ui/button";
 import { ScrollArea } from "../ui/scroll-area";
 import { useState, useEffect } from "react";
 import { useUserStore } from "@/store"; // Asegúrate de importar el store para obtener el usuario
-import { findUserById } from "@/services/private"; // Asegúrate de importar la función para encontrar usuarios
-import { listContacts } from "@/services/private"; // Asegúrate de importar la función para listar contactos
+import { findUserById, listContacts } from "@/services/private"; // Asegúrate de importar las funciones necesarias
 
 const ChatInfoDialog = ({ currentRoom }: { currentRoom: any }) => {
-  const [contacts, setContacts] = useState([]);
   const [currentUser, setCurrentUser] = useState<any>(null); // Estado para almacenar la información del usuario
+  const [membersInfo, setMembersInfo] = useState<any[]>([]); // Estado para almacenar la información de los miembros
   const { user } = useUserStore();
-
-  useEffect(() => {
-    const fetchContacts = async () => {
-      if (user?.email) {
-        const response = await listContacts(user.email);
-        if (response.ok) {
-          setContacts(response.data);
-        } else {
-          console.error(response.error);
-        }
-      }
-    };
-
-    fetchContacts();
-  }, [user]);
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
@@ -54,7 +38,22 @@ const ChatInfoDialog = ({ currentRoom }: { currentRoom: any }) => {
     fetchCurrentUser();
   }, [currentRoom, user]);
 
-  console.log(currentUser);
+  useEffect(() => {
+    const fetchMembersInfo = async () => {
+      if (currentRoom?.chatRoomType === "public") {
+        const memberIds = Object.keys(currentRoom.members);
+        const membersData = await Promise.all(
+          memberIds.map(async (memberId) => {
+            const response = await findUserById(memberId);
+            return response.ok ? response.data : null; // Retorna la información del miembro o null
+          })
+        );
+        setMembersInfo(membersData.filter(Boolean)); // Filtra los miembros que no se encontraron
+      }
+    };
+
+    fetchMembersInfo();
+  }, [currentRoom]);
 
   return (
     <Dialog>
@@ -95,9 +94,11 @@ const ChatInfoDialog = ({ currentRoom }: { currentRoom: any }) => {
               <div>
                 <Label>Members</Label>
                 <ScrollArea className="h-32 mt-2">
-                  {currentRoom.members && currentRoom.members.length > 0 ? (
-                    currentRoom.members.map((member: string) => (
-                      <p key={member}>{member}</p>
+                  {membersInfo.length > 0 ? (
+                    membersInfo.map((member) => (
+                      <p
+                        key={member._id}
+                      >{`${member.name} ${member.lastname}`}</p>
                     ))
                   ) : (
                     <p>No members in this group</p>
