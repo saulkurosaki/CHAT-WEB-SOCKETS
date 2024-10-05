@@ -324,3 +324,26 @@ export const getChatRoomDetails = async (
     };
   }
 };
+
+export const deleteChatRoom = async (
+  chatRoomId: string
+): Promise<IResponse<any>> => {
+  try {
+    const response = await axiosInstance.delete(`/chat-rooms/${chatRoomId}`);
+    return {
+      ok: true,
+      data: response.data,
+    };
+  } catch (error: unknown | AxiosError) {
+    let errorMessage = "Error al eliminar la sala de chat";
+
+    if (error instanceof AxiosError) {
+      errorMessage = error.response?.data?.message || errorMessage;
+    }
+
+    return {
+      ok: false,
+      error: errorMessage,
+    };
+  }
+};
