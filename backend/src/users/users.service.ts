@@ -87,22 +87,28 @@ export class UsersService {
   }
   async findContacts(term: string, contacts: ShowContacts) {
     const user = await this.findOne(term);
-
+  
+    if (!user) {
+      throw new NotFoundException(`User not found for term: ${term}`);
+    }
+  
+    if (!user.contacts || typeof user.contacts !== 'object') {
+      return []; 
+    }
+  
     if (contacts === ShowContacts.LIST) {
       return Object.keys(user.contacts);
     }
-
+  
     if (contacts === ShowContacts.FULL) {
-
       const contactsList = Object.keys(user.contacts).map(key => new ObjectId(key));
-
+  
       const foundContacts = await this.userModel.find({ _id: { $in: contactsList } });
-
-
+  
       return foundContacts;
     }
-
-    return new InternalServerErrorException('Check logs - Talk with an administrator');
+  
+    throw new BadRequestException('Invalid ShowContacts option');
   }
 
   async addContact(term: string, updateUserDto: UpdateUserDto) {
