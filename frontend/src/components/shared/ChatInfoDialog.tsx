@@ -10,11 +10,13 @@ import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { ScrollArea } from "../ui/scroll-area";
 import { useState, useEffect } from "react";
-import { useUserStore } from "@/store"; // Asegúrate de importar el store para obtener contactos
+import { useUserStore } from "@/store"; // Asegúrate de importar el store para obtener el usuario
+import { findUserById } from "@/services/private"; // Asegúrate de importar la función para encontrar usuarios
 import { listContacts } from "@/services/private"; // Asegúrate de importar la función para listar contactos
 
 const ChatInfoDialog = ({ currentRoom }: { currentRoom: any }) => {
   const [contacts, setContacts] = useState([]);
+  const [currentUser, setCurrentUser] = useState<any>(null); // Estado para almacenar la información del usuario
   const { user } = useUserStore();
 
   useEffect(() => {
@@ -31,6 +33,28 @@ const ChatInfoDialog = ({ currentRoom }: { currentRoom: any }) => {
 
     fetchContacts();
   }, [user]);
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      if (currentRoom?.chatRoomType === "private") {
+        const memberIds = Object.keys(currentRoom.members);
+        for (const memberId of memberIds) {
+          if (memberId !== user._id) {
+            // Compara con el ID del usuario en sesión
+            const response = await findUserById(memberId);
+            if (response.ok) {
+              setCurrentUser(response.data); // Guarda la información del usuario encontrado
+              break; // Salir del bucle una vez que se encuentra el usuario
+            }
+          }
+        }
+      }
+    };
+
+    fetchCurrentUser();
+  }, [currentRoom, user]);
+
+  console.log(currentUser);
 
   return (
     <Dialog>
@@ -85,20 +109,31 @@ const ChatInfoDialog = ({ currentRoom }: { currentRoom: any }) => {
             <>
               <div>
                 <Label>Name</Label>
-                <p>{currentRoom?.name}</p>
+                <p>
+                  {currentUser?.name} {currentUser?.lastname}
+                </p>{" "}
+                {/* Nombre y apellido */}
               </div>
-              {currentRoom?.email && (
-                <div>
-                  <Label>Email</Label>
-                  <p>{currentRoom.email}</p>
-                </div>
-              )}
-              {currentRoom?.phone && (
-                <div>
-                  <Label>Phone</Label>
-                  <p>{currentRoom.phone}</p>
-                </div>
-              )}
+              <div>
+                <Label>Username</Label>
+                <p>{currentUser?.username}</p> {/* Username */}
+              </div>
+              <div>
+                <Label>Email</Label>
+                <p>{currentUser?.email}</p> {/* Email */}
+              </div>
+              <div>
+                <Label>Avatar</Label>
+                {currentUser?.avatar ? (
+                  <img
+                    src={currentUser.avatar}
+                    alt="User Avatar"
+                    className="w-full h-72 object-cover rounded-md" // Altura igual a la del avatar del grupo
+                  />
+                ) : (
+                  <p>No avatar image for this user</p>
+                )}
+              </div>
             </>
           )}
           <Button
