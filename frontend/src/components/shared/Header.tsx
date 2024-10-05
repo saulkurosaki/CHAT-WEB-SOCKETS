@@ -1,24 +1,15 @@
 import { useState } from "react";
 
 import { useMatch, useNavigate } from "react-router-dom";
-import {
-  ArrowLeft,
-  Info,
-  LogOut,
-  MoreVertical,
-  Search,
-  User,
-} from "lucide-react";
+import { ArrowLeft, LogOut, MoreVertical, Search } from "lucide-react";
 
 import { useSearchStore, useUserStore } from "@/store";
-import { useChatRoomsStore } from "@/store/chatrooms.store"; // Importa el store
-
-import { handleGetInitials } from "@/helpers";
+import { useChatRoomsStore } from "@/store/chatrooms.store";
 
 import { cn } from "@/lib/utils";
 
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Avatar, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import EditProfileDialog from "./EditProfileDialog";
@@ -32,7 +23,6 @@ export const Header = () => {
   const { currentRoom } = useChatRoomsStore(); // Obtiene currentRoom del store
 
   const [showSearch, setShowSearch] = useState(false);
-  const [showChatInfo, setShowChatInfo] = useState(false);
 
   const handleToggleSearch = () => {
     setShowSearch(!showSearch);
@@ -68,7 +58,7 @@ export const Header = () => {
 
       <div className="flex items-center space-x-4">
         {inChatRoom ? (
-          <ChatInfoDialog />
+          <ChatInfoDialog currentRoom={currentRoom} />
         ) : (
           <>
             <Search

@@ -6,23 +6,31 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
-import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { ScrollArea } from "../ui/scroll-area";
-import { Checkbox } from "../ui/checkbox";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useUserStore } from "@/store"; // Asegúrate de importar el store para obtener contactos
+import { listContacts } from "@/services/private"; // Asegúrate de importar la función para listar contactos
 
-const ChatInfoDialog = () => {
-  const [currentRoom, setCurrentRoom] = useState();
-  const [newGroupName, setNewGroupName] = useState();
-  const [newGroupImage, setNewGroupImage] = useState();
-  const [contacts, setContacts] = useState();
-  const [selectedGroupMembers, setSelectedGroupMembers] = useState();
+const ChatInfoDialog = ({ currentRoom }: { currentRoom: any }) => {
+  const [contacts, setContacts] = useState([]);
+  const { user } = useUserStore();
 
-  const updateGroupChat = () => {};
+  useEffect(() => {
+    const fetchContacts = async () => {
+      if (user?.email) {
+        const response = await listContacts(user.email);
+        if (response.ok) {
+          setContacts(response.data);
+        } else {
+          console.error(response.error);
+        }
+      }
+    };
 
-  const deleteChat = () => {};
+    fetchContacts();
+  }, [user]);
 
   return (
     <Dialog>
@@ -32,95 +40,46 @@ const ChatInfoDialog = () => {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {currentRoom?.type === "group" ? "Group Info" : "Contact Info"}
+            {currentRoom?.chatRoomType === "public"
+              ? "Group Info"
+              : "Contact Info"}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          {currentRoom?.type === "group" ? (
+          {currentRoom?.chatRoomType === "public" ? (
             <>
               <div>
-                <Label htmlFor="edit-group-name">Group Name</Label>
-                <Input
-                  id="edit-group-name"
-                  value={newGroupName}
-                  onChange={(e) => setNewGroupName(e.target.value)}
-                  placeholder={currentRoom.name}
-                />
+                <Label>Group Name</Label>
+                <p>{currentRoom.name}</p>
               </div>
               <div>
-                <Label
-                  htmlFor="edit-group-image"
-                  className="cursor-pointer flex items-center justify-center p-2 border border-dashed border-gray-300 rounded-md"
-                >
-                  <Camera className="mr-2 h-4 w-4" />
-                  <span>Change Group Image</span>
-                  <Input
-                    id="edit-group-image"
-                    type="file"
-                    className="hidden"
-                    onChange={(e) => setNewGroupImage(e.target.files[0])}
+                <Label>Group Description</Label>
+                <p>{currentRoom.description}</p>
+              </div>
+              <div>
+                <Label>Group Avatar</Label>
+                {currentRoom.avatar ? (
+                  <img
+                    src={currentRoom.avatar}
+                    alt="Group Avatar"
+                    className="w-full h-72 object-cover rounded-md"
                   />
-                </Label>
-                {(newGroupImage || currentRoom.image) && (
-                  <div className="mt-2 relative">
-                    <img
-                      src={
-                        newGroupImage
-                          ? URL.createObjectURL(newGroupImage)
-                          : URL.createObjectURL(currentRoom.image)
-                      }
-                      alt="Group preview"
-                      className="w-full h-32 object-cover rounded-md"
-                    />
-                    <Button
-                      variant="ghost"
-                      className="absolute top-0 right-0"
-                      onClick={() => setNewGroupImage(null)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
+                ) : (
+                  <p>No avatar image in this group</p>
                 )}
               </div>
               <div>
-                <Label>Add Members</Label>
-                <ScrollArea className="h-[200px] mt-2">
-                  {contacts.map((contact) => (
-                    <div
-                      key={contact._id}
-                      className="flex items-center space-x-2 mb-2"
-                    >
-                      <Checkbox
-                        id={`add-contact-${contact._id}`}
-                        checked={
-                          selectedGroupMembers.includes(contact.username) ||
-                          currentRoom.members.includes(contact.username)
-                        }
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            setSelectedGroupMembers((prev) => [
-                              ...prev,
-                              contact.username,
-                            ]);
-                          } else {
-                            setSelectedGroupMembers((prev) =>
-                              prev.filter(
-                                (username) => username !== contact.username
-                              )
-                            );
-                          }
-                        }}
-                      />
-                      <Label htmlFor={`add-contact-${contact._id}`}>
-                        {contact.name}
-                      </Label>
-                    </div>
-                  ))}
+                <Label>Members</Label>
+                <ScrollArea className="h-32 mt-2">
+                  {currentRoom.members && currentRoom.members.length > 0 ? (
+                    currentRoom.members.map((member: string) => (
+                      <p key={member}>{member}</p>
+                    ))
+                  ) : (
+                    <p>No members in this group</p>
+                  )}
                 </ScrollArea>
               </div>
-              <Button onClick={updateGroupChat} className="w-full">
-                Save Changes
-              </Button>
             </>
           ) : (
             <>
@@ -142,7 +101,13 @@ const ChatInfoDialog = () => {
               )}
             </>
           )}
-          <Button variant="destructive" onClick={deleteChat} className="w-full">
+          <Button
+            variant="destructive"
+            onClick={() => {
+              /* Lógica para eliminar el chat */
+            }}
+            className="w-full"
+          >
             <Trash2 className="mr-2 h-4 w-4" />
             Delete Chat
           </Button>
