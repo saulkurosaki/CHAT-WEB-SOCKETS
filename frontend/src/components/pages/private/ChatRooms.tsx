@@ -27,8 +27,9 @@ export const ChatRooms = () => {
     loadChatRooms();
   }, [user, fetchChatRooms, updatePrivateRoomsAvatarAndName]);
 
-  const filteredChats = chats.filter((chat) =>
-    chat.name.toLowerCase().includes(search.toLowerCase())
+  const filteredChats = chats.filter(
+    (chat) =>
+      chat.name.toLowerCase().includes(search.toLowerCase()) && !chat.isDeleted
   );
 
   return (
@@ -79,10 +80,7 @@ export const ChatRooms = () => {
                 </div>
               ))
             ) : (
-              <div className="flex items-center justify-center h-full text-gray-500">
-                No chats exist at the moment. Create a new one to start
-                chatting.
-              </div>
+              <div className="p-4">No chat rooms available.</div>
             )}
           </ScrollArea>
           <Footer />
