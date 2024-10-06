@@ -148,15 +148,9 @@ export class ChatRoomsService {
     const chatRoom = await this.findOne(term);
     if (!chatRoom) throw new BadRequestException('Chat Room not found');
 
-    // Verificamos si el usuario es el creador del chat room
-    if (chatRoom.createdBy.toString() !== user._id.toString()) {
-      throw new BadRequestException(
-        'Only the creator can delete the chat room',
-      );
-    }
-      // Marcamos la sala como eliminada
-      chatRoom.isDeleted = true;
-      await chatRoom.save(); // Guardamos los cambios
+    // Marcamos la sala como eliminada
+    chatRoom.isDeleted = true;
+    await chatRoom.save(); // Guardamos los cambios
   
       return `Chat room ${term} has been successfully deleted`;
     }
