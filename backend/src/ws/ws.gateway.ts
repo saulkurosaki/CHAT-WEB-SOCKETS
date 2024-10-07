@@ -34,6 +34,8 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleConnection(client: Socket, ...args: any[]) {
 
     const user = await this.authWsGuard.getUser(client);
+    console.log("👨🏻‍💻 =>", { user });
+
     if (!user) {
       client.disconnect();
       return;

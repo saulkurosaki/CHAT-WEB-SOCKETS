@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useMatch, useNavigate } from "react-router-dom";
-import { ArrowLeft, LogOut, MoreVertical, Search } from "lucide-react";
+import { ArrowLeft, CloudCog, LogOut, MoreVertical, Search } from "lucide-react";
 
 import { useSearchStore, useUserStore } from "@/store";
 import { useChatRoomsStore } from "@/store/chatrooms.store";
@@ -14,6 +14,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import EditProfileDialog from "./EditProfileDialog";
 import ChatInfoDialog from "./ChatInfoDialog";
+import { socket } from '@/test_ws/socket';
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export const Header = () => {
   const { user, setUser } = useUserStore();
   const { search, setSearch } = useSearchStore();
   const { currentRoom } = useChatRoomsStore(); // Obtiene currentRoom del store
+
 
   const [showSearch, setShowSearch] = useState(false);
 
@@ -34,10 +36,27 @@ export const Header = () => {
   };
 
   const handleLogout = () => {
+
+    socket.disconnect()
+
     localStorage.clear();
     setUser(null);
     navigate("/auth/login", { replace: true });
   };
+
+  // FIXME: 
+  useEffect(() => {
+    console.log('FIXME')
+
+    socket.on('conn', (conn) => console.log({ conn }))
+
+    socket.on('message', (msg) => console.log(msg))
+    // return () => {
+    //   eliminar listener
+    // }
+  }, [])
+
+
 
   return (
     <div className="flex items-center justify-between text-white p-4 bg-teal-600">

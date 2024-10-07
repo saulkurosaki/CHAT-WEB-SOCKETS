@@ -5,6 +5,7 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Send } from "lucide-react";
 import { useChatRoomsStore } from "@/store/chatrooms.store"; // Importa el store
+import { sendMessageWS } from '@/test_ws/socket';
 
 const ChatRoom = () => {
   const { id } = useParams(); // Obtiene el chatRoomId de los parámetros de la URL
@@ -31,7 +32,17 @@ const ChatRoom = () => {
     }
   }, [currentRoom]);
 
-  const sendMessage = () => {};
+  // FIXME:
+  const sendMessage = (e: Event) => {
+
+    e.preventDefault()
+    // console.log({ e })
+    // console.log({ message })
+    sendMessageWS({
+      chatRoom: '67041b4bec892e73b2609fe1', // id del chatroom
+      content: message,
+    })
+  };
 
   if (loading) {
     return <div>Cargando...</div>;
@@ -54,16 +65,14 @@ const ChatRoom = () => {
         {messages.map((msg, index) => (
           <div
             key={index}
-            className={`flex mb-4 ${
-              msg.sender === currentRoom.name ? "justify-end" : "justify-start"
-            }`}
+            className={`flex mb-4 ${msg.sender === currentRoom.name ? "justify-end" : "justify-start"
+              }`}
           >
             <div
-              className={`rounded-lg p-2 max-w-xs ${
-                msg.sender === currentRoom.name
-                  ? "bg-teal-500 text-white"
-                  : "bg-white"
-              }`}
+              className={`rounded-lg p-2 max-w-xs ${msg.sender === currentRoom.name
+                ? "bg-teal-500 text-white"
+                : "bg-white"
+                }`}
             >
               <p className="font-semibold text-xs mb-1">{msg.sender}</p>
               <p>{msg.text}</p>
@@ -83,6 +92,8 @@ const ChatRoom = () => {
           onChange={(e) => setMessage(e.target.value)}
           className="flex-grow mr-2"
         />
+
+        {/* FIXME:*/}
         <Button type="submit">
           <Send className="h-4 w-4" />
         </Button>

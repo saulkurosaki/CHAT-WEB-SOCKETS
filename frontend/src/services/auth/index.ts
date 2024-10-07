@@ -40,11 +40,20 @@ export const register = async (
       "/auth/register",
       body
     );
+
+
+
     return {
       ok: true,
       data: response.data,
     };
   } catch (error: unknown | AxiosError) {
+
+
+    const { error: err, message, statusCode } = await (error as any).response.data;
+
+    console.log({ err, message, statusCode })
+
     let errorMessage = "Algo salió mal, intenta de nuevo";
 
     if (error instanceof AxiosError) {
